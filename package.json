@@ -1,0 +1,26 @@
+{
+  "dependencies": {
+    "discord.js": "^11.3.2",
+    "erlpack": "hammerandchisel/erlpack",
+    "moment": "^2.22.1",
+    "uws": "^9.147.0"
+  },
+  "name": "hunterbot",
+  "description": "",
+  "version": "1.0.0",
+  "main": "main.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fadillzzz/HunterBot.git"
+  },
+  "author": "fad",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fadillzzz/HunterBot/issues"
+  },
+  "homepage": "https://github.com/fadillzzz/HunterBot#readme"
+}
