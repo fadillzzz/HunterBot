@@ -22,7 +22,7 @@ class DeleteHub {
                     reply: message.author
                 });
             } else {
-                message.channel.send(`You haven't put up a hub`, {
+                message.channel.send('You have not posted a hub', {
                     reply: message.author
                 });
             }
