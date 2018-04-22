@@ -1,5 +1,5 @@
-const Discord = require('discord.js');
-const moment = require('moment');
+const {isCommandEqualTo} = require('../helpers/common.js');
+const {parsePassword, getEmbed} = require('../helpers/hub.js');
 
 class PostHub {
     constructor(config) {
@@ -16,63 +16,17 @@ class PostHub {
             mhw: 'MHW',
             world: 'MHW'
         };
+        this._hubs = {};
     }
 
-    async respond(bot, message) {
-        if (message.content.startsWith('post ') || message.content === 'post') {
-            const pieces = message.content.split(' ');
+    get commandName() {
+        return 'post';
+    }
 
-            if (pieces.length >= 4) {
-                const game = this.translateGame(pieces[1]);
-
-                if (game) {
-                    const id = pieces[2];
-                    const pass = pieces[3].match(/^\d{4}$/) ? pieces[3] : 'N/A';
-                    const description = pieces.slice(4).join(' ') || 'N/A';
-
-                    const post = await bot.client.channels.get(this._config.postHubChannel).send('', {
-                        embed: this.getEmbed(game, id, pass, description, message)
-                    });
-
-                    post.delete(7200 * 1000);
-                } else {
-                    message.channel.send('Invalid game!', {
-                        reply: message.author
-                    });
-                }
-            } else {
-                message.channel.send(`${this._config.prefix}post [Game] [Hub ID] [Password] [Description]`, {
-                    reply: message.author
-                });
-            }
+    respond(bot, message) {
+        if (isCommandEqualTo('post', message.content)) {
+            this.newHub(bot, message);
         }
-    }
-
-    /**
-     * Generate the rich embed object for the hub
-     *
-     * @param {String} game
-     * @param {String} id
-     * @Param {String} pass
-     * @param {String} description
-     * @param {String} message
-     * @return {Object}
-     */
-    getEmbed(game, id, pass, description, message) {
-        const expDate = moment().utc().add(2, 'hours');
-
-        return (new Discord.RichEmbed({
-            title: `[${game}] ${id}`,
-            fields: [{
-                name: `Password: ${pass}`,
-                value: description
-            }],
-            timestamp: expDate.format(),
-            footer: {
-                text: `${message.author.tag} | Expires`,
-                icon_url: message.author.displayAvatarURL
-            }
-        })).setColor('RANDOM');
     }
 
     /**
@@ -83,6 +37,67 @@ class PostHub {
      */
     translateGame(game) {
         return this._games[game.toLowerCase()];
+    }
+
+    /**
+     * Posts a new hub on the quest board
+     *
+     * @param {Object} bot
+     * @param {Object} message
+     */
+    async newHub(bot, message) {
+        const pieces = message.content.split(' ');
+
+        if (this._hubs[message.author.id]) {
+            message.channel.send(`You've already put up a hub`, {
+                reply: message.author
+            });
+
+            return;
+        }
+
+        if (pieces.length >= 4) {
+            const game = this.translateGame(pieces[1]);
+
+            if (game) {
+                const id = pieces[2];
+                const pass = parsePassword(pieces[3]);
+                const description = pieces.slice(4).join(' ') || 'N/A';
+
+                const post = await bot.client.channels.get(this._config.postHubChannel).send('', {
+                    embed: getEmbed(game, id, pass, description, message.author)
+                });
+
+                this._hubs[message.author.id] = true;
+
+                bot.broadcast('hub-created', {
+                    game,
+                    id,
+                    pass,
+                    description,
+                    author: message.author,
+                    post
+                });
+
+                message.channel.send(`Your hub has been posted to <#${this._config.postHubChannel}>`, {
+                    reply: message.author
+                });
+            } else {
+                message.channel.send('Invalid game!', {
+                    reply: message.author
+                });
+            }
+        } else {
+            message.channel.send(`\`${this._config.prefix}post [Game] [ID] [Password] [Description]\``, {
+                reply: message.author
+            });
+        }
+    }
+
+    on(event, data) {
+        if (event === 'hub-deleted') {
+            delete this._hubs[data.author.id];
+        }
     }
 }
 

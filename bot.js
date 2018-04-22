@@ -46,6 +46,18 @@ class Bot {
             }
         });
 
+        this._client.on('ready', () => {
+            if (this._config.avatar) {
+                this._client.user.setAvatar(this._config.avatar);
+            }
+
+            this._features.map(feature => {
+                if (feature.init) {
+                    feature.init(this);
+                }
+            });
+        });
+
         this._client.login(this._config.token);
 
         return this;
@@ -68,12 +80,36 @@ class Bot {
     }
 
     /**
+     * Broadcast an event to all features capable of handling events
+     *
+     * @param {String} event
+     * @param {Object} data
+     * @return {this}
+     */
+    broadcast(event, data) {
+        this._features.map(feature => {
+            if (feature.on) {
+                feature.on(event, data, this);
+            }
+        });
+    }
+
+    /**
      * Retrieves the Discord client instance
      *
      * @return {Object}
      */
     get client() {
         return this._client;
+    }
+
+    /**
+     * Retrieves installed features
+     *
+     * @return {Object[]}
+     */
+    get features() {
+        return this._features;
     }
 }
 
