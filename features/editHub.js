@@ -18,6 +18,14 @@ class EditHub {
         return 'edit';
     }
 
+    get commandHelp() {
+        return `\:arrow_forward: \`${this._config.prefix}edit <ID/Pass/Description> <Value>\`
+Edit information of the hub you have previously posted.
+
+Example:
+\`/edit Pass 3434\``;
+    }
+
     /**
      * Edits a hub on the quest board
      *
@@ -59,9 +67,7 @@ class EditHub {
                 });
             }
         } else {
-            message.channel.send(`\`${this._config.prefix}edit [ID/Pass/Description] [New Value]\``, {
-                reply: message.author
-            });
+            message.channel.send(this.commandHelp, {reply: message.author});
         }
     }
 

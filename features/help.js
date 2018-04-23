@@ -1,16 +1,23 @@
 const {isCommandEqualTo} = require('../helpers/common.js');
 
 class Help {
+    constructor(config) {
+        this._config = config;
+    }
+
     get commandName() {
         return 'help';
     }
 
+    get commandHelp() {
+        return `\:arrow_forward: \`${this._config.prefix}help\`
+Get help with all the available commands.`;
+    }
+
     respond(bot, message) {
         if (isCommandEqualTo('help', message.content)) {
-            const commandList = bot.features.map(feature => feature.commandName);
-            message.channel.send(`Available commands: \`${commandList.join('`, `')}\``, {
-                reply: message.author
-            });
+            const commandHelps = bot.features.map(feature => feature.commandHelp || '');
+            message.channel.send(commandHelps.join("\n\n\n"), {reply: message.author});
         }
     }
 

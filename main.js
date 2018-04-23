@@ -8,4 +8,5 @@ const Help = require('./features/help.js');
 
 const client = new Discord.Client();
 const bot = new Bot(client, config);
-bot.addFeatures([new PostHub(config), new EditHub(config), new DeleteHub(), new Help()]).init();
+// To do: Figure out what to do with all these config args
+bot.addFeatures([new PostHub(config), new EditHub(config), new DeleteHub(config), new Help(config)]).init();

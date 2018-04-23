@@ -23,6 +23,14 @@ class PostHub {
         return 'post';
     }
 
+    get commandHelp() {
+        return `\:arrow_forward: \`${this._config.prefix}post <Game> <Hub ID> <Pass> <Description>\`
+Post your online hub information.
+
+Example:
+\`/post XX 22-3333-4444-5555 6767 Let's hunt Crimson Fatalis\``;
+    }
+
     respond(bot, message) {
         if (isCommandEqualTo('post', message.content)) {
             this.newHub(bot, message);
@@ -49,7 +57,7 @@ class PostHub {
         const pieces = message.content.split(' ');
 
         if (this._hubs[message.author.id]) {
-            message.channel.send(`You've already put up a hub`, {
+            message.channel.send(`You have already posted a hub`, {
                 reply: message.author
             });
 
@@ -83,14 +91,10 @@ class PostHub {
                     reply: message.author
                 });
             } else {
-                message.channel.send('Invalid game!', {
-                    reply: message.author
-                });
+                message.channel.send('Invalid game!', {reply: message.author});
             }
         } else {
-            message.channel.send(`\`${this._config.prefix}post [Game] [ID] [Password] [Description]\``, {
-                reply: message.author
-            });
+            message.channel.send(this.commandHelp, {reply: message.author});
         }
     }
 

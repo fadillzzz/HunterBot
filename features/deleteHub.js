@@ -2,13 +2,19 @@ const {isCommandEqualTo} = require('../helpers/common.js');
 const {getHubByAuthor} = require('../helpers/hub.js');
 
 class DeleteHub {
-    constructor() {
+    constructor(config) {
         this._hubs = {};
         this._timer = 7200;
+        this._config = config;
     }
 
     get commandName() {
         return 'delete';
+    }
+
+    get commandHelp() {
+        return `\:arrow_forward: \`${this._config.prefix}delete\`
+Delete the hub you have previously posted.`;
     }
 
     respond(bot, message) {
