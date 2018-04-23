@@ -95,7 +95,7 @@ Example:
         if (event === 'hub-timer-set') {
             const hub = this._hubs[data.post.id];
             if (hub) {
-                hub.expires = moment().utc().add(hub.timer, 'seconds').format();
+                hub.expires = moment().utc().add(data.timer, 'seconds').format();
                 this._hubs[data.post.id] = hub;
                 this.applyEdit(hub);
             }
