@@ -1,4 +1,5 @@
 const {isCommandEqualTo} = require('../helpers/common.js');
+const Discord = require('discord.js');
 
 class Help {
     constructor(config) {
@@ -9,15 +10,31 @@ class Help {
         return 'help';
     }
 
+    get commandHelpAsArray() {
+        return [
+            `\:arrow_forward: \`${this._config.prefix}${this.commandName}\``,
+            'Get help with all the available commands.'
+        ];
+    }
+
     get commandHelp() {
-        return `\:arrow_forward: \`${this._config.prefix}help\`
-Get help with all the available commands.`;
+        return this.commandHelpAsArray.join("\n");
     }
 
     respond(bot, message) {
         if (isCommandEqualTo('help', message.content)) {
-            const commandHelps = bot.features.map(feature => feature.commandHelp || '');
-            message.channel.send(commandHelps.join("\n\n\n"), {reply: message.author});
+            const commandHelps = bot.features.map(feature => feature.commandHelpAsArray).filter(help => {
+                return help.constructor.name === 'Array' && help.length > 0;
+            });
+            message.channel.send('', {
+                embed: new Discord.RichEmbed({
+                    // To do: This should be handled by each feature
+                    fields: commandHelps.map(help => ({
+                        name: help[0],
+                        value: help.length > 1 ? help.slice(1).join("\n") : 'No description available.'
+                    }))
+                })
+            });
         }
     }
 

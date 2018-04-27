@@ -18,12 +18,18 @@ class EditHub {
         return 'edit';
     }
 
-    get commandHelp() {
-        return `\:arrow_forward: \`${this._config.prefix}edit <ID/Pass/Description> <Value>\`
-Edit information of the hub you have previously posted.
+    get commandHelpAsArray() {
+        return [
+            `\:arrow_forward: \`${this._config.prefix}${this.commandName} <ID/Pass/Description> <Value>\``,
+            'Edit information of the hub you have previously posted.',
+            '',
+            'Example:',
+            `\`${this._config.prefix}${this.commandName} Pass 3434\``
+        ];
+    }
 
-Example:
-\`/edit Pass 3434\``;
+    get commandHelp() {
+        return this.commandHelpAsArray.join("\n");
     }
 
     /**

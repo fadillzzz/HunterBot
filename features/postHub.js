@@ -23,12 +23,18 @@ class PostHub {
         return 'post';
     }
 
-    get commandHelp() {
-        return `\:arrow_forward: \`${this._config.prefix}post <Game> <Hub ID> <Pass> <Description>\`
-Post your online hub information.
+    get commandHelpAsArray() {
+        return [
+            `\:arrow_forward: \`${this._config.prefix}${this.commandName} <Game> <Hub ID> <Pass> <Description>\``,
+            'Post your online hub information.',
+            '',
+            'Example:',
+            `\`${this._config.prefix}${this.commandName} XX 22-3333-4444-5555 6767 Let's hunt Crimson Fatalis\``
+        ];
+    }
 
-Example:
-\`/post XX 22-3333-4444-5555 6767 Let's hunt Crimson Fatalis\``;
+    get commandHelp() {
+        return this.commandHelpAsArray.join("\n");
     }
 
     respond(bot, message) {

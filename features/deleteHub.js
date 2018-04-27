@@ -12,9 +12,15 @@ class DeleteHub {
         return 'delete';
     }
 
+    get commandHelpAsArray() {
+        return [
+            `\:arrow_forward: \`${this._config.prefix}${this.commandName}\``,
+            'Delete the hub you have previously posted.'
+        ];
+    }
+
     get commandHelp() {
-        return `\:arrow_forward: \`${this._config.prefix}delete\`
-Delete the hub you have previously posted.`;
+        return this.commandHelpAsArray.join("\n");
     }
 
     respond(bot, message) {
