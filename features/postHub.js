@@ -100,7 +100,7 @@ class PostHub {
                 message.channel.send('Invalid game!', {reply: message.author});
             }
         } else {
-            message.channel.send(this.commandHelp, {reply: message.author});
+            message.channel.send(this.commandHelp);
         }
     }
 
