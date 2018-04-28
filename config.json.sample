@@ -1,6 +1,14 @@
 {
+    // Login token
     "token": "",
+    // Command prefix
     "prefix": "/",
+    // Text channel where the bot will be listening for commands
     "listenChannel": "",
-    "postHubChannel": ""
+    // Text channel where hub will be posted
+    "postHubChannel": "",
+    // Path to bot avatar
+    "avatar": "",
+    // Timer (in seconds) for hub deletion
+    "timer": 0
 }

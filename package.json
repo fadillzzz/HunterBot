@@ -1,8 +1,10 @@
 {
   "dependencies": {
+    "@types/node": "9.6.7",
     "discord.js": "^11.3.2",
     "erlpack": "hammerandchisel/erlpack",
     "moment": "^2.22.1",
+    "typescript": "^2.8.3",
     "uws": "^9.147.0"
   },
   "name": "hunterbot",
@@ -11,7 +13,8 @@
   "main": "main.js",
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc && cp config.json ./build"
   },
   "repository": {
     "type": "git",

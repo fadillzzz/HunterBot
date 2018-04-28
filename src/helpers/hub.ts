@@ -1,11 +1,13 @@
-const Discord = require('discord.js');
+import {RichEmbed} from 'discord.js';
+import {Hub} from '../interfaces/hub.interface';
 
 /**
  * Tests a password and returns "N/A" if it fails
  *
+ * @param {String} password
  * @return {String}
  */
-function parsePassword(password) {
+export function parsePassword(password: string): string {
     return password.match(/^\d{4}$/) ? password : 'N/A';
 }
 
@@ -14,13 +16,20 @@ function parsePassword(password) {
  *
  * @param {String} game
  * @param {String} id
- * @Param {String} pass
+ * @param {String} pass
  * @param {String} description
- * @param {String} author
- * @return {Object}
+ * @param {String} author.tag
+ * @param {String} author.displayAvatarURL
+ * @return {RichEmbed}
  */
-function getEmbed(game, id, pass, description, author) {
-    return (new Discord.RichEmbed({
+export function getEmbed(
+    game: string,
+    id: string,
+    pass: string,
+    description: string,
+    author: {tag: string, displayAvatarURL: string}
+): RichEmbed {
+    return (new RichEmbed({
         title: `[${game}] ${id}`,
         fields: [{
             name: `Password: ${pass}`,
@@ -36,13 +45,15 @@ function getEmbed(game, id, pass, description, author) {
 /**
  * Retrieves a hub, given a message author
  *
+ * @param {Object} hubs
+ * @param {Object} hubs[].author
+ * @param {String} hubs[].author.id
  * @param {Object} author
+ * @param {String} author.id
  * @return {Object}
  */
-function getHubByAuthor(hubs, author) {
+export function getHubByAuthor(hubs: {[propname: string]: Hub}, author: {id: string}): object | undefined {
     return Object.values(hubs).find(hub => {
         return hub.author.id === author.id;
     });
 }
-
-module.exports = {parsePassword, getEmbed, getHubByAuthor};

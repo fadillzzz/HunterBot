@@ -5,9 +5,7 @@
  * @param {String} message
  * @return {Boolean}
  */
-function isCommandEqualTo(commandName, message) {
+export function isCommandEqualTo(commandName: string, message: string): boolean {
     message = message.toLowerCase();
     return message.startsWith(commandName + ' ') || message === commandName;
 }
-
-module.exports = {isCommandEqualTo};
