@@ -3,6 +3,7 @@ import {isCommandEqualTo} from '../helpers/common';
 import {parsePassword, getEmbed, getHubByAuthor} from '../helpers/hub';
 import {Feature} from '../interfaces/feature.interface';
 import {HubConfig as Config, Hub} from '../interfaces/hub.interface';
+import {delayAction, checkMessageExists} from '../decorators/common';
 import {Message, RichEmbed} from 'discord.js';
 import Bot from '../bot';
 
@@ -31,6 +32,8 @@ export default class EditHub implements Feature {
         this.hubs = {};
     }
 
+    @delayAction(250)
+    @checkMessageExists
     respond(bot: Bot, message: Message) {
         if (isCommandEqualTo(this.commandName, message.content)) {
             this.editHub(bot, message);

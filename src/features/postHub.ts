@@ -4,6 +4,7 @@ import {Games} from '../enums/hub.enum';
 import {Message, RichEmbed, TextChannel} from 'discord.js';
 import {isCommandEqualTo} from '../helpers/common';
 import {parsePassword, getEmbed} from '../helpers/hub';
+import {delayAction, checkMessageExists} from '../decorators/common';
 import Bot from '../bot';
 
 export default class PostHub implements Feature {
@@ -49,6 +50,8 @@ export default class PostHub implements Feature {
         }]});
     }
 
+    @delayAction(250)
+    @checkMessageExists
     public respond(bot: Bot, message: Message) {
         if (isCommandEqualTo(this.commandName, message.content)) {
             this.newHub(bot, message);
