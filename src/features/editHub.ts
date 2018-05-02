@@ -4,7 +4,7 @@ import {parsePassword, getEmbed, getHubByAuthor} from '../helpers/hub';
 import {Feature} from '../interfaces/feature.interface';
 import {HubConfig as Config, Hub} from '../interfaces/hub.interface';
 import {delayAction, checkMessageExists} from '../decorators/common';
-import {Message, RichEmbed} from 'discord.js';
+import {Message, RichEmbed, MessageReaction, User} from 'discord.js';
 import Bot from '../bot';
 
 export default class EditHub implements Feature {
@@ -107,12 +107,59 @@ export default class EditHub implements Feature {
             embed.timestamp = hub.expires;
         }
 
+        if (hub.full) {
+            let newTitle = embed.title!.match(/^\[.*\]/)![0];
+            newTitle += ` 🚧\\*\\*Hall Full\\*\\*🚧`;
+            embed.title = newTitle;
+        }
+
         hub.post.edit('', {embed});
     }
 
-    public on(event: string, data: any) {
+    /**
+     * Set up a button to mark a hub as full
+     *
+     * @param {Bot} bot
+     * @param {*} data
+     * @return {this}
+     */
+    private setUpHubFullButton(bot: Bot, data: any): this {
+        data.post.react('🚧');
+
+        // Collector may not have been initialised at this point, so let's be careful
+        this.hubs[data.post.id].collector && this.hubs[data.post.id].collector.stop();
+
+        const collector = data.post.createReactionCollector(() => true, {
+            time: moment(this.hubs[data.post.id].expires).diff(moment())
+        });
+
+        this.hubs[data.post.id] = Object.assign({}, this.hubs[data.post.id], {collector});
+
+        collector.on('collect', (reaction: MessageReaction) => {
+            reaction.users.filterArray((user: User) => {
+                return user.id !== data.author.id && user.id !== bot.client.user.id;
+            }).forEach((user: User) => {
+                reaction.remove(user);
+            });
+
+            reaction.users.forEach((user: User) => {
+                if (user.id === data.author.id) {
+                    if (reaction.emoji.name === '🚧') {
+                        this.hubs[data.post.id].full = !this.hubs[data.post.id].full;
+                        this.applyEdit(this.hubs[data.post.id]);
+                        reaction.remove(user.id);
+                    }
+                }
+            });
+        });
+
+        return this;
+    }
+
+    public on(event: string, data: any, bot: Bot) {
         if (event === 'hub-created') {
             this.hubs[data.post.id] = data;
+            this.setUpHubFullButton(bot, data);
         }
 
         if (event === 'hub-timer-set') {
@@ -121,10 +168,13 @@ export default class EditHub implements Feature {
                 hub.expires = moment().utc().add(data.timer, 'seconds').toDate();
                 this.hubs[data.post.id] = hub;
                 this.applyEdit(hub);
+                // Set up the button again to reset the reaction collector timer
+                this.setUpHubFullButton(bot, data);
             }
         }
 
         if (event === 'hub-deleted') {
+            this.hubs[data.post.id].collector.stop();
             delete this.hubs[data.post.id];
         }
     }
