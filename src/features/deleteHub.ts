@@ -1,7 +1,7 @@
 import {isCommandEqualTo} from '../helpers/common';
 import {getHubByAuthor} from '../helpers/hub';
 import {DeleteHubConfig as Config, Hub} from '../interfaces/hub.interface';
-import {Message, RichEmbed} from 'discord.js';
+import {Message, RichEmbed, MessageReaction, User} from 'discord.js';
 import {Feature} from '../interfaces/feature.interface';
 import Bot from '../bot';
 
@@ -44,9 +44,7 @@ export default class DeleteHub implements Feature {
             if (hub) {
                 this.deleteHub(bot, hub.post);
 
-                message.channel.send('Your hub has been deleted', {
-                    reply: message.author
-                });
+                message.react('✅');
             } else {
                 message.channel.send('You have not posted a hub', {
                     reply: message.author
@@ -64,19 +62,71 @@ export default class DeleteHub implements Feature {
     deleteHub(bot: Bot, post: Message) {
         if (this.hubs[post.id]) {
             bot.broadcast('hub-deleted', this.hubs[post.id]);
+            clearTimeout(this.hubs[post.id].timer);
+            this.hubs[post.id].collector.stop();
             delete this.hubs[post.id];
             post.delete();
         }
     }
 
+    /**
+     * Set up buttons for hub deletion and extension
+     *
+     * @param {Bot} bot
+     * @param {*} data
+     */
+    setUpActionButtons(bot: Bot, data: any) {
+        data.post.react('🗑');
+        data.post.react('🔁');
+
+        const collector = data.post.createReactionCollector(() => true, {time: this.config.timer * 1000});
+        this.hubs[data.post.id] = Object.assign({}, this.hubs[data.post.id], {collector});
+
+        collector.on('collect', (reaction: MessageReaction) => {
+            reaction.users.filterArray((user: User) => {
+                return user.id !== data.author.id && user.id !== bot.client.user.id;
+            }).forEach((user: User) => {
+                reaction.remove(user);
+            });
+
+            reaction.users.forEach((user: User) => {
+                if (user.id === data.author.id) {
+                    if (reaction.emoji.name === '🗑') {
+                        this.deleteHub(bot, data.post);
+                    }
+
+                    if (reaction.emoji.name === '🔁') {
+                        clearTimeout(this.hubs[data.post.id].timer);
+                        this.hubs[data.post.id].collector.stop();
+                        this.setUpTimer(bot, data);
+                        this.setUpActionButtons(bot, data);
+                        reaction.remove(user.id);
+                    }
+                }
+            });
+        });
+    }
+
+    /**
+     * Set up a timer for automatic hub deletion
+     *
+     * @param {Bot} bot
+     * @param {*} data
+     */
+    setUpTimer(bot: Bot, data: any) {
+        const timer = setTimeout(this.deleteHub.bind(this, bot, data.post), this.config.timer * 1000);
+        this.hubs[data.post.id] = Object.assign({}, this.hubs[data.post.id], {timer});
+        bot.broadcast(
+            'hub-timer-set',
+            Object.assign({}, this.hubs[data.post.id], {timer: this.config.timer})
+        );
+    }
+
     on(event: string, data: any, bot: Bot) {
         if (event === 'hub-created') {
-            const timer = setTimeout(this.deleteHub.bind(this, bot, data.post), this.config.timer * 1000);
-            this.hubs[data.post.id] = Object.assign({}, data, {timer});
-            bot.broadcast(
-                'hub-timer-set',
-                Object.assign({}, this.hubs[data.post.id], {timer: this.config.timer})
-            );
+            this.hubs[data.post.id] = data;
+            this.setUpTimer(bot, data);
+            this.setUpActionButtons(bot, data);
         }
     }
 }
