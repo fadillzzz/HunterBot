@@ -109,7 +109,7 @@ export default class EditHub implements Feature {
 
         if (hub.full) {
             let newTitle = embed.title!.match(/^\[.*\]/)![0];
-            newTitle += ` 🚧\\*\\*Hub Full\\*\\*🚧`;
+            newTitle += ` 🚧**Hub Full**🚧`;
             embed.title = newTitle;
         }
 
