@@ -40,7 +40,8 @@ export default class Help implements Feature {
                 }
             });
 
-            message.channel.send('', {embed});
+            message.author.send('', {embed});
+            message.react('✅');
         }
     }
 
