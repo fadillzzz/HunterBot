@@ -34,7 +34,7 @@ export default class EditHub implements Feature {
 
     @delayAction(250)
     @checkMessageExists
-    respond(bot: Bot, message: Message) {
+    public respond(bot: Bot, message: Message) {
         if (isCommandEqualTo(this.commandName, message.content)) {
             this.editHub(bot, message);
         }
@@ -55,7 +55,7 @@ export default class EditHub implements Feature {
      * @param {Bot} bot
      * @param {Message} message
      */
-    editHub(bot: Bot, message: Message) {
+    private editHub(bot: Bot, message: Message) {
         const pieces = message.content.split(' ');
 
         if (pieces.length >= 3) {
@@ -99,7 +99,7 @@ export default class EditHub implements Feature {
      *
      * @param {Hub} hub
      */
-    applyEdit(hub: Hub) {
+    private applyEdit(hub: Hub) {
         const embed = getEmbed(hub.game, hub.id, hub.pass, hub.description, hub.author);
 
         if (hub.expires) {
@@ -110,7 +110,7 @@ export default class EditHub implements Feature {
         hub.post.edit('', {embed});
     }
 
-    on(event: string, data: any) {
+    public on(event: string, data: any) {
         if (event === 'hub-created') {
             this.hubs[data.post.id] = data;
         }

@@ -37,7 +37,7 @@ export default class DeleteHub implements Feature {
         }]});
     }
 
-    respond(bot: Bot, message: Message) {
+    public respond(bot: Bot, message: Message) {
         if (isCommandEqualTo('delete', message.content)) {
             const hub = <Hub>getHubByAuthor(this.hubs, message.author);
 
@@ -59,7 +59,7 @@ export default class DeleteHub implements Feature {
      * @param {Bot} bot
      * @param {Message} post
      */
-    deleteHub(bot: Bot, post: Message) {
+    private deleteHub(bot: Bot, post: Message) {
         if (this.hubs[post.id]) {
             bot.broadcast('hub-deleted', this.hubs[post.id]);
             clearTimeout(this.hubs[post.id].timer);
@@ -74,8 +74,9 @@ export default class DeleteHub implements Feature {
      *
      * @param {Bot} bot
      * @param {*} data
+     * @return {this}
      */
-    setUpActionButtons(bot: Bot, data: any) {
+    private setUpActionButtons(bot: Bot, data: any): this {
         data.post.react('🗑');
         data.post.react('🔁');
 
@@ -98,13 +99,14 @@ export default class DeleteHub implements Feature {
                     if (reaction.emoji.name === '🔁') {
                         clearTimeout(this.hubs[data.post.id].timer);
                         this.hubs[data.post.id].collector.stop();
-                        this.setUpTimer(bot, data);
-                        this.setUpActionButtons(bot, data);
+                        this.setUpTimer(bot, data).setUpActionButtons(bot, data);
                         reaction.remove(user.id);
                     }
                 }
             });
         });
+
+        return this;
     }
 
     /**
@@ -112,17 +114,20 @@ export default class DeleteHub implements Feature {
      *
      * @param {Bot} bot
      * @param {*} data
+     * @return {this}
      */
-    setUpTimer(bot: Bot, data: any) {
+    private setUpTimer(bot: Bot, data: any): this {
         const timer = setTimeout(this.deleteHub.bind(this, bot, data.post), this.config.timer * 1000);
         this.hubs[data.post.id] = Object.assign({}, this.hubs[data.post.id], {timer});
         bot.broadcast(
             'hub-timer-set',
             Object.assign({}, this.hubs[data.post.id], {timer: this.config.timer})
         );
+
+        return this;
     }
 
-    on(event: string, data: any, bot: Bot) {
+    public on(event: string, data: any, bot: Bot) {
         if (event === 'hub-created') {
             this.hubs[data.post.id] = data;
             this.setUpTimer(bot, data);

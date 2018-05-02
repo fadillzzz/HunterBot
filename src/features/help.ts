@@ -27,7 +27,7 @@ export default class Help implements Feature {
         }]});
     }
 
-    respond(bot: Bot, message: Message) {
+    public respond(bot: Bot, message: Message) {
         if (isCommandEqualTo('help', message.content)) {
             const commandHelps = bot.features.map(feature => feature.commandHelpEmbed).filter(Boolean);
             const embed = new RichEmbed();
@@ -45,7 +45,7 @@ export default class Help implements Feature {
         }
     }
 
-    init(bot: Bot) {
+    public init(bot: Bot) {
         bot.client.user.setPresence({game: {name: 'Type /help'}, status: 'online'});
     }
 }
