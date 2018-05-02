@@ -1,6 +1,8 @@
 export enum Games {
     xx = 'MHXX',
     mhxx = 'MHXX',
+    gen = 'MHGEN',
+    mhgen = 'MHGEN',
     '4u' = 'MH4U',
     mh4u = 'MH4U',
     '3u' = 'MH3U',
