@@ -129,9 +129,11 @@ export default class EditHub implements Feature {
         // Collector may not have been initialised at this point, so let's be careful
         this.hubs[data.post.id].collector && this.hubs[data.post.id].collector.stop();
 
-        const collector = data.post.createReactionCollector(() => true, {
-            time: moment(this.hubs[data.post.id].expires).diff(moment())
-        });
+        // To do: Have a default timer, just in case `expires` doesn't get set ever
+        const collector = data.post.createReactionCollector(
+            (reaction: MessageReaction) => reaction.emoji.name === '🚧',
+            {time: moment(this.hubs[data.post.id].expires).diff(moment())}
+        );
 
         this.hubs[data.post.id] = Object.assign({}, this.hubs[data.post.id], {collector});
 

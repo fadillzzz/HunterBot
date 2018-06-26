@@ -85,7 +85,7 @@ export default class PostHub implements Feature {
 
             return;
         }
-
+        // To do: Create exceptions for all these errors
         if (pieces.length >= 4) {
             const game = this.translateGame(pieces[1]);
 

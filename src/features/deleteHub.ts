@@ -80,7 +80,11 @@ export default class DeleteHub implements Feature {
         data.post.react('🗑');
         data.post.react('🔁');
 
-        const collector = data.post.createReactionCollector(() => true, {time: this.config.timer * 1000});
+        const collector = data.post.createReactionCollector(
+            (reaction: MessageReaction) => ['🗑', '🔁'].includes(reaction.emoji.name),
+            {time: this.config.timer * 1000}
+        );
+
         this.hubs[data.post.id] = Object.assign({}, this.hubs[data.post.id], {collector});
 
         collector.on('collect', (reaction: MessageReaction) => {
