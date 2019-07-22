@@ -18,3 +18,8 @@ Use NPM or Yarn to install the packages and run the following command:
 `npm run build`
 
 By default the output directory is set to `./build`.
+
+## To Do
+* Post Hubs to different channels depending on the Game & Platform
+* Database support
+* Guild cards maybe?
