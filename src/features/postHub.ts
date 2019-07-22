@@ -16,13 +16,6 @@ export default class PostHub implements Feature {
     private config: Config;
 
     /**
-     * An enum of valid games
-     *
-     * @var {Games}
-     */
-    private games: {[propName: string]: string} = {};
-
-    /**
      * A collection of objects, each of which represents a hub
      *
      * @var {Object}
@@ -36,9 +29,6 @@ export default class PostHub implements Feature {
      */
     constructor(config: Config) {
         this.config = config;
-        // This feels kinda awkward. Perhaps there's a better way to do this.
-        // To do: Figure out a better approach (?)
-        this.games = Object(Games);
     }
 
     get commandHelpEmbed(): RichEmbed {
@@ -65,8 +55,7 @@ export default class PostHub implements Feature {
      * @return {String}
      */
     private translateGame(game: string): string {
-        // Not sure why I need to cast to 'any', but jeez I couldn't care less at this point
-        return Games[<any>game.toLowerCase()];
+        return Games[game.toUpperCase() as keyof typeof Games];
     }
 
     /**
