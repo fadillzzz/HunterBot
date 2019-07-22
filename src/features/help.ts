@@ -1,7 +1,7 @@
-import {isCommandEqualTo} from '../helpers/common';
-import {Message, RichEmbed} from 'discord.js';
-import {Feature} from '../interfaces/feature.interface';
-import Bot from '../bot';
+import { Message, RichEmbed } from "discord.js";
+import Bot from "../bot";
+import { isCommandEqualTo } from "../helpers/common";
+import { Feature } from "../interfaces/feature.interface";
 
 export default class Help implements Feature {
     /**
@@ -11,7 +11,7 @@ export default class Help implements Feature {
      */
     private prefix: string;
 
-    public readonly commandName = 'help';
+    public readonly commandName = "help";
 
     /**
      * @param {String} prefix
@@ -21,14 +21,18 @@ export default class Help implements Feature {
     }
 
     get commandHelpEmbed(): RichEmbed {
-        return new RichEmbed({fields: [{
-            name: `\:arrow_forward: \`${this.prefix}${this.commandName}\``,
-            value: 'Get help with all the available commands.'
-        }]});
+        return new RichEmbed({
+            fields: [
+                {
+                    name: `\:arrow_forward: \`${this.prefix}${this.commandName}\``,
+                    value: "Get help with all the available commands.",
+                },
+            ],
+        });
     }
 
     public respond(bot: Bot, message: Message) {
-        if (isCommandEqualTo('help', message.content)) {
+        if (isCommandEqualTo("help", message.content)) {
             const commandHelps = bot.features.map(feature => feature.commandHelpEmbed).filter(Boolean);
             const embed = new RichEmbed();
 
@@ -40,12 +44,12 @@ export default class Help implements Feature {
                 }
             });
 
-            message.author.send('', {embed});
-            message.react('✅');
+            message.author.send("", { embed });
+            message.react("✅");
         }
     }
 
     public init(bot: Bot) {
-        bot.client.user.setPresence({game: {name: 'Type /help'}, status: 'online'});
+        bot.client.user.setPresence({ game: { name: "Type /help" }, status: "online" });
     }
 }

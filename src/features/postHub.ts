@@ -1,11 +1,12 @@
-import {PostHubConfig as Config} from '../interfaces/hub.interface';
-import {Feature} from '../interfaces/feature.interface';
-import {Games} from '../enums/hub.enum';
-import {Message, RichEmbed, TextChannel} from 'discord.js';
-import {isCommandEqualTo} from '../helpers/common';
-import {parsePassword, getEmbed} from '../helpers/hub';
-import {delayAction, checkMessageExists} from '../decorators/common';
-import Bot from '../bot';
+import { Message, RichEmbed, TextChannel } from "discord.js";
+import Bot from "../bot";
+import { checkMessageExists, delayAction } from "../decorators/common";
+import { Games } from "../enums/hub.enum";
+import { InvalidGame } from "../exceptions/common";
+import { isCommandEqualTo } from "../helpers/common";
+import { getEmbed, parsePassword } from "../helpers/hub";
+import { Feature } from "../interfaces/feature.interface";
+import { PostHubConfig as Config } from "../interfaces/hub.interface";
 
 export default class PostHub implements Feature {
     /**
@@ -20,9 +21,9 @@ export default class PostHub implements Feature {
      *
      * @var {Object}
      */
-    private hubs: {[propName: string]: any} = {};
+    private hubs: { [propName: string]: any } = {};
 
-    public readonly commandName = 'post';
+    public readonly commandName = "post";
 
     /**
      * @param {Config} config
@@ -32,12 +33,20 @@ export default class PostHub implements Feature {
     }
 
     get commandHelpEmbed(): RichEmbed {
-        return new RichEmbed({fields: [{
-            name:  `\:arrow_forward: \`${this.config.prefix}${this.commandName} <Game> <Hub ID> <Pass> <Description>\``,
-            value: `Post your online hub information.${"\n\n"}` +
-                   `Example:${"\n"}` +
-                   `\`${this.config.prefix}${this.commandName} XX 22-3333-4444-5555 6767 Let's hunt Crimson Fatalis\`${"\n"}`
-        }]});
+        const prefix = this.config.prefix;
+        const commandName = this.commandName;
+
+        return new RichEmbed({
+            fields: [
+                {
+                    name: `\:arrow_forward: \`${prefix}${commandName} <Game> <Hub ID> <Pass> <Description>\``,
+                    value:
+                        `Post your online hub information.\n\n` +
+                        `Example:\n` +
+                        `\`${prefix}${commandName} XX 22-3333-4444-5555 6767 Let's hunt Fatalis\`\n`,
+                },
+            ],
+        });
     }
 
     @delayAction(250)
@@ -55,7 +64,13 @@ export default class PostHub implements Feature {
      * @return {String}
      */
     private translateGame(game: string): string {
-        return Games[game.toUpperCase() as keyof typeof Games];
+        const matchedGame = Games[game.toUpperCase() as keyof typeof Games];
+
+        if (!matchedGame) {
+            throw new InvalidGame();
+        }
+
+        return matchedGame;
     }
 
     /**
@@ -65,15 +80,16 @@ export default class PostHub implements Feature {
      * @param {Message} message
      */
     private async newHub(bot: Bot, message: Message) {
-        const pieces = message.content.split(' ');
+        const pieces = message.content.split(" ");
 
         if (this.hubs[message.author.id]) {
-            message.channel.send('You have already posted a hub', {
-                reply: message.author
+            message.channel.send("You have already posted a hub", {
+                reply: message.author,
             });
 
             return;
         }
+
         // To do: Create exceptions for all these errors
         if (pieces.length >= 4) {
             const game = this.translateGame(pieces[1]);
@@ -81,41 +97,43 @@ export default class PostHub implements Feature {
             if (game) {
                 const id = pieces[2];
                 const pass = parsePassword(pieces[3]);
-                const description = pieces.slice(4).join(' ') || 'N/A';
+                const description = pieces.slice(4).join(" ") || "N/A";
                 const channel = bot.client.channels.get(this.config.postHubChannel);
 
                 if (channel) {
-                    const post = await (<TextChannel>channel).send('', {
-                        embed: getEmbed(game, id, pass, description, message.author)
+                    const post = await (channel as TextChannel).send("", {
+                        embed: getEmbed(game, id, pass, description, message.author),
                     });
 
                     this.hubs[message.author.id] = true;
 
-                    bot.broadcast('hub-created', {
+                    bot.broadcast("hub-created", {
                         game,
                         id,
                         pass,
                         description,
                         author: message.author,
-                        post
+                        post,
                     });
 
                     message.channel.send(`Your hub has been posted to <#${this.config.postHubChannel}>`, {
-                        reply: message.author
+                        reply: message.author,
                     });
                 } else {
-                    message.channel.send('Bot is not configured correctly. Please notify an administrator');
+                    message.channel.send("Bot is not configured correctly. Please notify an administrator");
                 }
             } else {
-                message.channel.send('Invalid game!', {reply: message.author});
+                message.channel.send("Invalid game!", {
+                    reply: message.author,
+                });
             }
         } else {
-            message.channel.send('', {embed: this.commandHelpEmbed});
+            message.channel.send("", { embed: this.commandHelpEmbed });
         }
     }
 
     public on(event: string, data: any) {
-        if (event === 'hub-deleted') {
+        if (event === "hub-deleted") {
             delete this.hubs[data.author.id];
         }
     }

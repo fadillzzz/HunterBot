@@ -1,5 +1,5 @@
-import {Games} from '../enums/hub.enum';
-import {Message} from 'discord.js';
+import { Message } from "discord.js";
+import { Games } from "../enums/hub.enum";
 
 export interface HubConfig {
     prefix: string;

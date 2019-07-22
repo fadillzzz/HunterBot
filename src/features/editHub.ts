@@ -1,11 +1,11 @@
-import moment from 'moment';
-import {isCommandEqualTo} from '../helpers/common';
-import {parsePassword, getEmbed, getHubByAuthor} from '../helpers/hub';
-import {Feature} from '../interfaces/feature.interface';
-import {HubConfig as Config, Hub} from '../interfaces/hub.interface';
-import {delayAction, checkMessageExists} from '../decorators/common';
-import {Message, RichEmbed, MessageReaction, User} from 'discord.js';
-import Bot from '../bot';
+import { Message, MessageReaction, RichEmbed, User } from "discord.js";
+import moment from "moment";
+import Bot from "../bot";
+import { checkMessageExists, delayAction } from "../decorators/common";
+import { isCommandEqualTo } from "../helpers/common";
+import { getEmbed, getHubByAuthor, parsePassword } from "../helpers/hub";
+import { Feature } from "../interfaces/feature.interface";
+import { Hub, HubConfig as Config } from "../interfaces/hub.interface";
 
 export default class EditHub implements Feature {
     /**
@@ -20,9 +20,9 @@ export default class EditHub implements Feature {
      *
      * @var {[string]: Hub}
      */
-    private hubs: {[propName: string]: Hub} = {};
+    private hubs: { [propName: string]: Hub } = {};
 
-    public readonly commandName = 'edit';
+    public readonly commandName = "edit";
 
     /**
      * @param {Config} config
@@ -41,12 +41,17 @@ export default class EditHub implements Feature {
     }
 
     get commandHelpEmbed(): RichEmbed {
-        return new RichEmbed({fields: [{
-            name:  `\:arrow_forward: \`${this.config.prefix}${this.commandName} <ID/Pass/Description> <Value>\``,
-            value: `Edit information of the hub you have previously posted.${"\n\n"}` +
-                   `Example:${"\n"}` +
-                   `\`${this.config.prefix}${this.commandName} Pass 3434\`${"\n"}`
-        }]});
+        return new RichEmbed({
+            fields: [
+                {
+                    name: `\:arrow_forward: \`${this.config.prefix}${this.commandName} <ID/Pass/Description> <Value>\``,
+                    value:
+                        `Edit information of the hub you have previously posted.$\n\n` +
+                        `Example:\n` +
+                        `\`${this.config.prefix}${this.commandName} Pass 3434\`\n`,
+                },
+            ],
+        });
     }
 
     /**
@@ -56,19 +61,19 @@ export default class EditHub implements Feature {
      * @param {Message} message
      */
     private editHub(bot: Bot, message: Message) {
-        const pieces = message.content.split(' ');
+        const pieces = message.content.split(" ");
 
         if (pieces.length >= 3) {
             const attribute = pieces[1].toLowerCase();
 
-            if (['id', 'pass', 'description'].includes(attribute)) {
-                let newValue = attribute === 'description' ? pieces.slice(2).join(' ') : pieces[2];
+            if (["id", "pass", "description"].includes(attribute)) {
+                let newValue = attribute === "description" ? pieces.slice(2).join(" ") : pieces[2];
 
-                if (attribute === 'pass') {
+                if (attribute === "pass") {
                     newValue = parsePassword(newValue);
                 }
 
-                const hub = <Hub>getHubByAuthor(this.hubs, message.author);
+                const hub = getHubByAuthor(this.hubs, message.author) as Hub;
 
                 if (hub) {
                     hub[attribute] = newValue;
@@ -76,17 +81,17 @@ export default class EditHub implements Feature {
 
                     this.applyEdit(hub);
 
-                    message.channel.send('Your hub has been updated', {
-                        reply: message.author
+                    message.channel.send("Your hub has been updated", {
+                        reply: message.author,
                     });
                 } else {
-                    message.channel.send('You have not posted a hub', {
-                        reply: message.author
+                    message.channel.send("You have not posted a hub", {
+                        reply: message.author,
                     });
                 }
             } else {
-                message.channel.send('Valid attributes are `id`, `pass`, and `description`', {
-                    reply: message.author
+                message.channel.send("Valid attributes are `id`, `pass`, and `description`", {
+                    reply: message.author,
                 });
             }
         } else {
@@ -103,7 +108,7 @@ export default class EditHub implements Feature {
         const embed = getEmbed(hub.game, hub.id, hub.pass, hub.description, hub.author);
 
         if (hub.expires) {
-            embed.footer!.text += ' | Expires';
+            embed.footer!.text += " | Expires";
             embed.timestamp = hub.expires;
         }
 
@@ -113,7 +118,7 @@ export default class EditHub implements Feature {
             embed.title = newTitle;
         }
 
-        hub.post.edit('', {embed});
+        hub.post.edit("", { embed });
     }
 
     /**
@@ -124,29 +129,34 @@ export default class EditHub implements Feature {
      * @return {this}
      */
     private setUpHubFullButton(bot: Bot, data: any): this {
-        data.post.react('🚧');
+        data.post.react("🚧");
 
         // Collector may not have been initialised at this point, so let's be careful
-        this.hubs[data.post.id].collector && this.hubs[data.post.id].collector.stop();
+        if (this.hubs[data.post.id].collector) {
+            this.hubs[data.post.id].collector.stop();
+        }
 
         // To do: Have a default timer, just in case `expires` doesn't get set ever
         const collector = data.post.createReactionCollector(
-            (reaction: MessageReaction) => reaction.emoji.name === '🚧',
-            {time: moment(this.hubs[data.post.id].expires).diff(moment())}
+            (reaction: MessageReaction) => reaction.emoji.name === "🚧",
+            {
+                time: moment(this.hubs[data.post.id].expires).diff(moment()),
+            },
         );
 
-        this.hubs[data.post.id] = Object.assign({}, this.hubs[data.post.id], {collector});
+        this.hubs[data.post.id] = Object.assign({}, this.hubs[data.post.id], { collector });
 
-        collector.on('collect', (reaction: MessageReaction) => {
-            reaction.users.filterArray((user: User) => {
-                return user.id !== data.author.id && user.id !== bot.client.user.id;
-            }).forEach((user: User) => {
-                reaction.remove(user);
-            });
-
+        collector.on("collect", (reaction: MessageReaction) => {
+            reaction.users
+                .filterArray((user: User) => {
+                    return user.id !== data.author.id && user.id !== bot.client.user.id;
+                })
+                .forEach((user: User) => {
+                    reaction.remove(user);
+                });
             reaction.users.forEach((user: User) => {
                 if (user.id === data.author.id) {
-                    if (reaction.emoji.name === '🚧') {
+                    if (reaction.emoji.name === "🚧") {
                         this.hubs[data.post.id].full = !this.hubs[data.post.id].full;
                         this.applyEdit(this.hubs[data.post.id]);
                         reaction.remove(user.id);
@@ -159,15 +169,19 @@ export default class EditHub implements Feature {
     }
 
     public on(event: string, data: any, bot: Bot) {
-        if (event === 'hub-created') {
+        if (event === "hub-created") {
             this.hubs[data.post.id] = data;
             this.setUpHubFullButton(bot, data);
         }
 
-        if (event === 'hub-timer-set') {
+        if (event === "hub-timer-set") {
             const hub = this.hubs[data.post.id];
+
             if (hub) {
-                hub.expires = moment().utc().add(data.timer, 'seconds').toDate();
+                hub.expires = moment()
+                    .utc()
+                    .add(data.timer, "seconds")
+                    .toDate();
                 this.hubs[data.post.id] = hub;
                 this.applyEdit(hub);
                 // Set up the button again to reset the reaction collector timer
@@ -175,7 +189,7 @@ export default class EditHub implements Feature {
             }
         }
 
-        if (event === 'hub-deleted') {
+        if (event === "hub-deleted") {
             this.hubs[data.post.id].collector.stop();
             delete this.hubs[data.post.id];
         }
