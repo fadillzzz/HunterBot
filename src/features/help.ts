@@ -33,7 +33,7 @@ export default class Help implements Feature {
 
     public respond(bot: Bot, message: Message) {
         if (isCommandEqualTo("help", message.content)) {
-            const commandHelps = bot.features.map(feature => feature.commandHelpEmbed).filter(Boolean);
+            const commandHelps = bot.features.map(feature => feature.commandHelpEmbed);
             const embed = new RichEmbed();
 
             commandHelps.forEach(helpEmbed => {

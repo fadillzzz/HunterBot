@@ -1,6 +1,6 @@
-import {Config} from './interfaces/bot.interface';
-import {Feature} from './interfaces/feature.interface';
-import {Client, Message} from 'discord.js';
+import { Client, Message } from "discord.js";
+import { Config } from "./interfaces/bot.interface";
+import { Feature } from "./interfaces/feature.interface";
 
 export default class Bot {
     /**
@@ -48,7 +48,7 @@ export default class Bot {
      * @param {Feature[]} features
      * @return {this}
      */
-    addFeatures(features: Feature[]): this {
+    public addFeatures(features: Feature[]): this {
         this._features = this._features.concat(features);
         return this;
     }
@@ -58,7 +58,7 @@ export default class Bot {
      *
      * @return {this}
      */
-    setListenChannel(channelId: string): this {
+    public setListenChannel(channelId: string): this {
         this.listenChannel = channelId;
         return this;
     }
@@ -68,8 +68,8 @@ export default class Bot {
      *
      * @return {this}
      */
-    init(): this {
-        this._client.on('message', message => {
+    public init(): this {
+        this._client.on("message", message => {
             if (this.understandable(message)) {
                 message.content = message.content.substr(this.config.prefix.length);
                 this._features.map(feature => {
@@ -78,7 +78,7 @@ export default class Bot {
             }
         });
 
-        this._client.on('ready', () => {
+        this._client.on("ready", () => {
             if (this.config.avatar) {
                 this._client.user.setAvatar(this.config.avatar);
             }
@@ -101,11 +101,13 @@ export default class Bot {
      * @param {Message} message
      * @return {Boolean}
      */
-    understandable(message: Message): boolean {
+    public understandable(message: Message): boolean {
         // have a nice day
-        if (message.content.startsWith(this.config.prefix) &&
-            ! message.author.bot &&
-            message.channel.id === this.listenChannel) {
+        if (
+            message.content.startsWith(this.config.prefix) &&
+            !message.author.bot &&
+            message.channel.id === this.listenChannel
+        ) {
             return true;
         }
 
@@ -119,7 +121,7 @@ export default class Bot {
      * @param {Object} data
      * @return {this}
      */
-    broadcast(event: string, data: any): this {
+    public broadcast(event: string, data: any): this {
         this._features.map(feature => {
             if (feature.on) {
                 feature.on(event, data, this);

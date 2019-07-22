@@ -4,6 +4,9 @@
         "member-ordering": false,
         "object-literal-sort-keys": false,
         "arrow-parens": false,
-        "interface-name": false
+        "interface-name": false,
+        "variable-name": {
+            "options": ["allow-leading-underscore"]
+        }
     }
 }
