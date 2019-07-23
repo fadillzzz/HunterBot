@@ -93,7 +93,7 @@ export default class DeleteHub implements Feature {
 
         collector.on("collect", (reaction: MessageReaction) => {
             reaction.users
-                .filterArray((user: User) => {
+                .filter((user: User) => {
                     return user.id !== data.author.id && user.id !== bot.client.user.id;
                 })
                 .forEach((user: User) => {
