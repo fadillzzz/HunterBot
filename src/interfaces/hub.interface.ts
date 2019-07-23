@@ -5,26 +5,26 @@ export interface HubConfig {
     prefix: string;
 }
 
-export interface PostHubConfig extends HubConfig {
-    postHubChannel: string;
-}
-
 export interface DeleteHubConfig extends HubConfig {
     timer: number;
 }
 
-export interface Hub {
+export interface HubPrototype {
     game: Games;
     id: string;
-    pass: string;
+    pass: string | null;
     description: string;
     author: {
         id: string;
         tag: string;
         displayAvatarURL: string;
     };
+}
+
+export interface Hub extends HubPrototype {
     expires: Date;
     post: Message;
-    // Supresses error in EditHub because TS isn't smart enough
-    [propname: string]: any;
+    collector: any;
+    timer: NodeJS.Timer;
+    full: boolean;
 }

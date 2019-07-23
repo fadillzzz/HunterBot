@@ -9,6 +9,7 @@ export enum Games {
     MH4U = "MH4U",
     MHW = "MHW",
     WORLD = "MHW",
+    MHWORLD = "MHW",
 }
 
 export enum Platforms {

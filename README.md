@@ -2,7 +2,7 @@
 
 ## Configuration
 
-Copy the `config.json.sample` file as `config.json` and fill out the JSON attributes, with the most important ones being `loginToken`, `listenChannel`, and `postHubChannel`.
+Copy the `config.json.sample` (in `src`) file as `config.json` and fill out the JSON attributes, with the most important ones being `loginToken`, `listenChannel`, and `postHubChannel`.
 
 | Attribute        | Required | Description                                               |
 | ---------------- | -------- | --------------------------------------------------------- |

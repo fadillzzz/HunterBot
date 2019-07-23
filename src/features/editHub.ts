@@ -64,7 +64,7 @@ export default class EditHub implements Feature {
         const pieces = message.content.split(" ");
 
         if (pieces.length >= 3) {
-            const attribute = pieces[1].toLowerCase();
+            const attribute = pieces[1].toLowerCase() as "id" | "pass" | "description";
 
             if (["id", "pass", "description"].includes(attribute)) {
                 let newValue = attribute === "description" ? pieces.slice(2).join(" ") : pieces[2];
@@ -105,7 +105,7 @@ export default class EditHub implements Feature {
      * @param {Hub} hub
      */
     private applyEdit(hub: Hub) {
-        const embed = getEmbed(hub.game, hub.id, hub.pass, hub.description, hub.author);
+        const embed = getEmbed(hub);
 
         if (hub.expires) {
             embed.footer!.text += " | Expires";
@@ -113,9 +113,7 @@ export default class EditHub implements Feature {
         }
 
         if (hub.full) {
-            let newTitle = embed.title!.match(/^\[.*\]/)![0];
-            newTitle += ` 🚧**Hub Full**🚧`;
-            embed.title = newTitle;
+            embed.title += ` 🚧 **Full** 🚧`;
         }
 
         hub.post.edit("", { embed });

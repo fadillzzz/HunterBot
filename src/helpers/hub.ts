@@ -1,5 +1,5 @@
 import { RichEmbed } from "discord.js";
-import { Hub } from "../interfaces/hub.interface";
+import { Hub, HubPrototype } from "../interfaces/hub.interface";
 
 /**
  * Tests a password and returns "N/A" if it fails
@@ -22,21 +22,17 @@ export function parsePassword(password: string): string {
  * @param {String} author.displayAvatarURL
  * @return {RichEmbed}
  */
-export function getEmbed(
-    game: string,
-    id: string,
-    pass: string,
-    description: string,
-    author: { tag: string; displayAvatarURL: string },
-): RichEmbed {
+export function getEmbed({ game, id, pass, description = "", author }: HubPrototype): RichEmbed {
+    const fields = [];
+
+    if (pass) {
+        fields.push({ name: "Password:", value: pass });
+    }
+
     return new RichEmbed({
         title: `[${game}] ${id}`,
-        fields: [
-            {
-                name: `Password: ${pass}`,
-                value: description,
-            },
-        ],
+        description: description ? `\`\`\`${description}\`\`\`` : "",
+        fields,
         footer: {
             text: author.tag,
             icon_url: author.displayAvatarURL,

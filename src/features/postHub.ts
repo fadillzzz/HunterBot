@@ -2,11 +2,14 @@ import { Message, RichEmbed, TextChannel } from "discord.js";
 import Bot from "../bot";
 import { checkMessageExists, delayAction } from "../decorators/common";
 import { Games } from "../enums/hub.enum";
-import { InvalidGame } from "../exceptions/common";
+import { InvalidConfig, InvalidGame, InvalidId, InvalidSyntax } from "../exceptions/common";
+import { InvalidPlatform } from "../exceptions/postHub";
 import { isCommandEqualTo } from "../helpers/common";
-import { getEmbed, parsePassword } from "../helpers/hub";
+import { getEmbed } from "../helpers/hub";
 import { Feature } from "../interfaces/feature.interface";
-import { PostHubConfig as Config } from "../interfaces/hub.interface";
+import { HubPrototype } from "../interfaces/hub.interface";
+import { PostHubConfig as Config, PostHubStrategy } from "../interfaces/postHub.interface";
+import { Common, World } from "./postHubExt";
 
 export default class PostHub implements Feature {
     /**
@@ -17,11 +20,18 @@ export default class PostHub implements Feature {
     private config: Config;
 
     /**
-     * A collection of objects, each of which represents a hub
+     * User mapping that determines whether or not they've posted a hub
      *
      * @var {Object}
      */
-    private hubs: { [propName: string]: any } = {};
+    private hubs: { [propName: string]: boolean } = {};
+
+    /**
+     * Maps games to their respective postHub implementation
+     *
+     * @var {Object}
+     */
+    private hubStrategies: { [propName: string]: PostHubStrategy } = {};
 
     public readonly commandName = "post";
 
@@ -30,12 +40,21 @@ export default class PostHub implements Feature {
      */
     constructor(config: Config) {
         this.config = config;
+        // Is there a better way to do this?
+        this.hubStrategies = {
+            mhw: new World(config.games.mhw),
+            mh4u: new Common(config.games.mh4u, Games.MH4U),
+            mhxx: new Common(config.games.mhxx, Games.MHXX),
+            mhgu: new Common(config.games.mhgu, Games.MHGU),
+            // Do people play this still?
+            mhgen: new Common(config.games.mhgen, Games.MHGEN),
+        };
     }
 
     get commandHelpEmbed(): RichEmbed {
         const prefix = this.config.prefix;
         const commandName = this.commandName;
-
+        // To do: Update this for each game-specific postHub implementation
         return new RichEmbed({
             fields: [
                 {
@@ -80,8 +99,6 @@ export default class PostHub implements Feature {
      * @param {Message} message
      */
     private async newHub(bot: Bot, message: Message) {
-        const pieces = message.content.split(" ");
-
         if (this.hubs[message.author.id]) {
             message.channel.send("You have already posted a hub", {
                 reply: message.author,
@@ -90,45 +107,68 @@ export default class PostHub implements Feature {
             return;
         }
 
-        // To do: Create exceptions for all these errors
-        if (pieces.length >= 4) {
-            const game = this.translateGame(pieces[1]);
+        try {
+            const pieces = message.content.split(" ");
 
-            if (game) {
-                const id = pieces[2];
-                const pass = parsePassword(pieces[3]);
-                const description = pieces.slice(4).join(" ") || "N/A";
-                const channel = bot.client.channels.get(this.config.postHubChannel);
+            if (pieces.length <= 1) {
+                throw new InvalidSyntax();
+            }
 
-                if (channel) {
-                    const post = await (channel as TextChannel).send("", {
-                        embed: getEmbed(game, id, pass, description, message.author),
-                    });
+            const game: string = this.translateGame(pieces[1]);
+            const hubStrat: PostHubStrategy = this.hubStrategies[game.toLowerCase()];
 
-                    this.hubs[message.author.id] = true;
+            hubStrat.setMessage(message).isSyntaxValid();
 
-                    bot.broadcast("hub-created", {
-                        game,
-                        id,
-                        pass,
-                        description,
-                        author: message.author,
-                        post,
-                    });
+            const hubInfo: HubPrototype = hubStrat.extractHubInfo();
+            const channelId: string = hubStrat.getTargetChannelId();
+            const channel: TextChannel = bot.client.channels.get(channelId) as TextChannel;
 
-                    message.channel.send(`Your hub has been posted to <#${this.config.postHubChannel}>`, {
-                        reply: message.author,
-                    });
-                } else {
-                    message.channel.send("Bot is not configured correctly. Please notify an administrator");
-                }
-            } else {
+            const post = await channel.send("", {
+                embed: getEmbed(hubInfo),
+            });
+
+            this.hubs[message.author.id] = true;
+
+            bot.broadcast("hub-created", { ...hubInfo, post });
+
+            message.channel.send(`Your hub has been posted to <#${channelId}>`, {
+                reply: message.author,
+            });
+        } catch (e) {
+            // To do: Abstract these error handlers (should use visitor here, probably)
+            if (e instanceof InvalidSyntax) {
+                message.channel.send("", { embed: this.commandHelpEmbed });
+                return;
+            }
+
+            if (e instanceof InvalidGame) {
                 message.channel.send("Invalid game!", {
                     reply: message.author,
                 });
+                return;
             }
-        } else {
-            message.channel.send("", { embed: this.commandHelpEmbed });
+
+            if (e instanceof InvalidConfig) {
+                message.channel.send("Bot is not configured correctly. Please notify an administrator");
+                return;
+            }
+
+            if (e instanceof InvalidPlatform) {
+                message.channel.send("Invalid platform!", {
+                    reply: message.author,
+                });
+                return;
+            }
+
+            if (e instanceof InvalidId) {
+                message.channel.send("Invalid ID!", {
+                    reply: message.author,
+                });
+                return;
+            }
+
+            message.channel.send("Something went wrong. Please notify an administrator");
+            throw e;
         }
     }
 
