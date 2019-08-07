@@ -37,8 +37,6 @@ export default class Help implements Feature {
             const embed = new RichEmbed();
 
             commandHelps.forEach(helpEmbed => {
-                // TS wouldn't shut up about the addField line unless I do this unnecessary check.
-                // helpEmbed!.fields![0] in the if statement should've been enough, IMO.
                 if (helpEmbed && helpEmbed.fields && helpEmbed.fields[0]) {
                     embed.addField(helpEmbed.fields[0].name, helpEmbed.fields[0].value);
                 }

@@ -1,15 +1,16 @@
 import { Message, RichEmbed, TextChannel } from "discord.js";
-import Bot from "../bot";
-import { checkMessageExists, delayAction } from "../decorators/common";
-import { Games } from "../enums/hub.enum";
-import { InvalidConfig, InvalidGame, InvalidId, InvalidSyntax } from "../exceptions/common";
-import { InvalidPlatform } from "../exceptions/postHub";
-import { isCommandEqualTo } from "../helpers/common";
-import { getEmbed } from "../helpers/hub";
-import { Feature } from "../interfaces/feature.interface";
-import { HubPrototype } from "../interfaces/hub.interface";
-import { PostHubConfig as Config, PostHubStrategy } from "../interfaces/postHub.interface";
-import { Common, World } from "./postHubExt";
+import Bot from "../../bot";
+import { checkMessageExists, delayAction } from "../../decorators/common";
+import { Games } from "../../enums/hub.enum";
+import { InvalidConfig, InvalidGame, InvalidId, InvalidSyntax } from "../../exceptions/common";
+import { InvalidPlatform } from "../../exceptions/postHub";
+import { isCommandEqualTo } from "../../helpers/common";
+import { getEmbed } from "../../helpers/hub";
+import { Feature } from "../../interfaces/feature.interface";
+import { HubPrototype } from "../../interfaces/hub.interface";
+import { PostHubConfig as Config, PostHubStrategy } from "../../interfaces/postHub.interface";
+import { default as Common } from "./common";
+import { default as World } from "./world";
 
 export default class PostHub implements Feature {
     /**
