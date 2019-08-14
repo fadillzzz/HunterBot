@@ -25,7 +25,7 @@ export default class Help implements Feature {
             fields: [
                 {
                     name: `\:arrow_forward: \`${this.prefix}${this.commandName}\``,
-                    value: "Get help with all the available commands.",
+                    value: "Get help with all the available commands.\n\n:information_source: <> Required\n:information_source: [ ] Optional",
                 },
             ],
         });
@@ -37,8 +37,10 @@ export default class Help implements Feature {
             const embed = new RichEmbed();
 
             commandHelps.forEach(helpEmbed => {
-                if (helpEmbed && helpEmbed.fields && helpEmbed.fields[0]) {
-                    embed.addField(helpEmbed.fields[0].name, helpEmbed.fields[0].value);
+                if (helpEmbed && helpEmbed.fields) {
+                    helpEmbed.fields.forEach(help => {
+                        embed.addField(help.name, help.value);
+                    });
                 }
             });
 

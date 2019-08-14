@@ -48,4 +48,11 @@ export default class World extends Base implements PostHubStrategy {
 
         throw new InvalidPlatform();
     }
+
+    public commandHelpEmbedField(commandName: string): { name: string; value: string } {
+        return {
+            name: `:arrow_forward: \`${commandName} <MHW/MHWorld/World> <Hub ID> <Xbox/PS4/PC> [Description]\``,
+            value: `Example:\n\`${commandName} MHW abc123defGHI PC ATKT P1 R17\`\n`,
+        };
+    }
 }

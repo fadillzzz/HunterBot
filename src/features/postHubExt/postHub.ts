@@ -42,6 +42,7 @@ export default class PostHub implements Feature {
     constructor(config: Config) {
         this.config = config;
         // Is there a better way to do this?
+        // To do: consider a simple if/else that checks if given game is MHWorld
         this.hubStrategies = {
             mhw: new World(config.games.mhw),
             mh4u: new Common(config.games.mh4u, Games.MH4U),
@@ -54,17 +55,20 @@ export default class PostHub implements Feature {
 
     get commandHelpEmbed(): RichEmbed {
         const prefix = this.config.prefix;
-        const commandName = this.commandName;
-        // To do: Update this for each game-specific postHub implementation
+        const commandName = prefix + this.commandName;
+        const fetched: { [key: string]: boolean } = {};
+        const childFields: Array<{ name: string; value: string }> = [
+            this.hubStrategies.mhw.commandHelpEmbedField(commandName),
+            this.hubStrategies.mh4u.commandHelpEmbedField(commandName),
+        ];
+
         return new RichEmbed({
             fields: [
                 {
-                    name: `\:arrow_forward: \`${prefix}${commandName} <Game> <Hub ID> <Pass> <Description>\``,
-                    value:
-                        `Post your online hub information.\n\n` +
-                        `Example:\n` +
-                        `\`${prefix}${commandName} XX 22-3333-4444-5555 6767 Let's hunt Fatalis\`\n`,
+                    name: `__Post your online hub information__`,
+                    value: `Valid games are: World, GU, XX, 4U`,
                 },
+                ...childFields,
             ],
         });
     }

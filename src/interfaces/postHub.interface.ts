@@ -58,4 +58,12 @@ export interface PostHubStrategy {
      * @return {String}
      */
     getTargetChannelId(): string;
+
+    /**
+     * Returns the command help message for the given game "type"
+     *
+     * @param {String} commandName
+     * @return {Object}
+     */
+    commandHelpEmbedField(commandName: string): {name: string; value: string;};
 }

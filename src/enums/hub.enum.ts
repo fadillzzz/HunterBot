@@ -14,7 +14,7 @@ export enum Games {
 
 export enum Platforms {
     PS4 = "PS4",
-    XBOX = "XBOX",
+    XBOX = "Xbox",
     PC = "PC",
     STEAM = "PC",
     SWITCH = "Switch",
