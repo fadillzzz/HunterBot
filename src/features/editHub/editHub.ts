@@ -99,9 +99,7 @@ export default class EditHub implements Feature {
 
             await this.applyEdit(updatedHub);
 
-            message.channel.send("Your hub has been updated", {
-                reply: message.author,
-            });
+            message.react("✅");
         } catch (e) {
             this.errorHandlers.forEach(handler => {
                 if (handler instanceof InvalidAttributeHandler) {
