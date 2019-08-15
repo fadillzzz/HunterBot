@@ -23,8 +23,8 @@ By default the output directory is set to `./build`.
 
 ## To Do
 
--   Post/Edit Hubs to different channels depending on the Game & Platform
 -   Add a command to change command prefix
+-   Add unit tests
 -   Database support
 -   Standardize syntax using a constructor object
 -   Guild cards maybe?
