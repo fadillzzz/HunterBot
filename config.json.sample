@@ -5,8 +5,28 @@
     "prefix": "/",
     // Text channel where the bot will be listening for commands
     "listenChannel": "",
-    // Text channel where hub will be posted
-    "postHubChannel": "",
+    // Text channels where hub will be posted
+    "games": {
+        "mhw": {
+            "channels": {
+                "xbox": "",
+                "ps4": "",
+                "pc": ""
+            }
+        },
+        "mh4u": {
+            "channel": ""
+        },
+        "mhxx": {
+            "channel": ""
+        },
+        "mhgu": {
+            "channel": ""
+        },
+        "mhgen": {
+            "channel": ""
+        }
+    },
     // Path to bot avatar
     "avatar": "",
     // Timer (in seconds) for hub deletion

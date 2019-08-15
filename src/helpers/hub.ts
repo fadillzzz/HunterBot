@@ -1,5 +1,5 @@
-import {RichEmbed} from 'discord.js';
-import {Hub} from '../interfaces/hub.interface';
+import { RichEmbed } from "discord.js";
+import { Hub, HubPrototype } from "../interfaces/hub.interface";
 
 /**
  * Tests a password and returns "N/A" if it fails
@@ -8,10 +8,10 @@ import {Hub} from '../interfaces/hub.interface';
  * @return {String}
  */
 export function parsePassword(password: string): string {
-    return password.match(/^\d{4}$/) ? password : 'N/A';
+    return password.match(/^\d{4}$/) ? password : "N/A";
 }
 
-/**
+/**+
  * Generate the rich embed object for the hub
  *
  * @param {String} game
@@ -22,24 +22,22 @@ export function parsePassword(password: string): string {
  * @param {String} author.displayAvatarURL
  * @return {RichEmbed}
  */
-export function getEmbed(
-    game: string,
-    id: string,
-    pass: string,
-    description: string,
-    author: {tag: string, displayAvatarURL: string}
-): RichEmbed {
-    return (new RichEmbed({
+export function getEmbed({ game, id, pass, description = "", author }: HubPrototype): RichEmbed {
+    const fields = [];
+
+    if (pass) {
+        fields.push({ name: "Password:", value: pass });
+    }
+
+    return new RichEmbed({
         title: `[${game}] ${id}`,
-        fields: [{
-            name: `Password: ${pass}`,
-            value: description
-        }],
+        description: description ? `\`\`\`${description}\`\`\`` : "",
+        fields,
         footer: {
             text: author.tag,
-            icon_url: author.displayAvatarURL
-        }
-    })).setColor('RANDOM');
+            icon_url: author.displayAvatarURL,
+        },
+    }).setColor("RANDOM");
 }
 
 /**
@@ -52,7 +50,7 @@ export function getEmbed(
  * @param {String} author.id
  * @return {Object}
  */
-export function getHubByAuthor(hubs: {[propname: string]: Hub}, author: {id: string}): object | undefined {
+export function getHubByAuthor(hubs: { [propname: string]: Hub }, author: { id: string }): object | undefined {
     return Object.values(hubs).find(hub => {
         return hub.author.id === author.id;
     });
