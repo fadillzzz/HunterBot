@@ -34,8 +34,8 @@ export default class DeleteHub implements Feature {
         return new RichEmbed({
             fields: [
                 {
-                    name: `\:arrow_forward: \`${this.config.prefix}${this.commandName}\``,
-                    value: "Delete the hub you have previously posted.",
+                    name: "__Delete your posted hub__",
+                    value: `:arrow_forward: \`${this.config.prefix}${this.commandName}\``,
                 },
             ],
         });

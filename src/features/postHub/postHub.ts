@@ -3,14 +3,22 @@ import Bot from "../../bot";
 import { checkMessageExists, delayAction } from "../../decorators/common";
 import { Games } from "../../enums/hub.enum";
 import { InvalidConfig, InvalidGame, InvalidId, InvalidSyntax } from "../../exceptions/common";
+import {
+    InvalidConfigHandler,
+    InvalidGameHandler,
+    InvalidIdHandler,
+    InvalidPlatformHandler,
+    InvalidSyntaxHandler,
+} from "../../exceptions/handlers";
 import { InvalidPlatform } from "../../exceptions/postHub";
-import { isCommandEqualTo } from "../../helpers/common";
+import { handleErrorWithFallback, isCommandEqualTo } from "../../helpers/common";
 import { getEmbed } from "../../helpers/hub";
+import { ErrorHandler } from "../../interfaces/exception.interface";
 import { Feature } from "../../interfaces/feature.interface";
 import { HubPrototype } from "../../interfaces/hub.interface";
 import { PostHubConfig as Config, PostHubStrategy } from "../../interfaces/postHub.interface";
-import { default as Common } from "./common";
-import { default as World } from "./world";
+import Common from "./common";
+import World from "./world";
 
 export default class PostHub implements Feature {
     /**
@@ -34,6 +42,8 @@ export default class PostHub implements Feature {
      */
     private hubStrategies: { [propName: string]: PostHubStrategy } = {};
 
+    private errorHandlers: ErrorHandler[] = [];
+
     public readonly commandName = "post";
 
     /**
@@ -51,6 +61,14 @@ export default class PostHub implements Feature {
             // Do people play this still?
             mhgen: new Common(config.games.mhgen, Games.MHGEN),
         };
+
+        this.errorHandlers = [
+            new InvalidSyntaxHandler(this.commandHelpEmbed),
+            new InvalidGameHandler(),
+            new InvalidConfigHandler(),
+            new InvalidPlatformHandler(),
+            new InvalidIdHandler(),
+        ];
     }
 
     get commandHelpEmbed(): RichEmbed {
@@ -140,40 +158,7 @@ export default class PostHub implements Feature {
                 reply: message.author,
             });
         } catch (e) {
-            // To do: Abstract these error handlers (should use visitor here, probably)
-            if (e instanceof InvalidSyntax) {
-                message.channel.send("", { embed: this.commandHelpEmbed });
-                return;
-            }
-
-            if (e instanceof InvalidGame) {
-                message.channel.send("Invalid game!", {
-                    reply: message.author,
-                });
-                return;
-            }
-
-            if (e instanceof InvalidConfig) {
-                message.channel.send("Bot is not configured correctly. Please notify an administrator");
-                return;
-            }
-
-            if (e instanceof InvalidPlatform) {
-                message.channel.send("Invalid platform!", {
-                    reply: message.author,
-                });
-                return;
-            }
-
-            if (e instanceof InvalidId) {
-                message.channel.send("Invalid ID!", {
-                    reply: message.author,
-                });
-                return;
-            }
-
-            message.channel.send("Something went wrong. Please notify an administrator");
-            throw e;
+            handleErrorWithFallback(e, message, this.errorHandlers);
         }
     }
 

@@ -72,7 +72,7 @@ export default class Common extends Base implements PostHubStrategy {
 
     public commandHelpEmbedField(commandName: string): { name: string; value: string } {
         return {
-            name: `:arrow_forward: \`${commandName} <Game> <Hub ID> [Pass] [Description]\``,
+            name: `:arrow_forward: Previous MH: \`${commandName} <Game> <Hub ID> [Pass] [Description]\``,
             value: `Example:\n\`${commandName} GU 22-3333-4444-5555 6767 Let's hunt Fatalis\`\n`,
         };
     }

@@ -1,11 +1,17 @@
 import { Message, MessageReaction, RichEmbed, User } from "discord.js";
 import moment from "moment";
-import Bot from "../bot";
-import { checkMessageExists, delayAction } from "../decorators/common";
-import { isCommandEqualTo } from "../helpers/common";
-import { getEmbed, getHubByAuthor, parsePassword } from "../helpers/hub";
-import { Feature } from "../interfaces/feature.interface";
-import { Hub, HubConfig as Config } from "../interfaces/hub.interface";
+import Bot from "../../bot";
+import { checkMessageExists, delayAction } from "../../decorators/common";
+import { Games } from "../../enums/hub.enum";
+import { InvalidIdHandler, InvalidSyntaxHandler } from "../../exceptions/handlers";
+import { InvalidAttributeHandler } from "../../exceptions/handlers/editHub";
+import { handleErrorWithFallback, isCommandEqualTo } from "../../helpers/common";
+import { getEmbed, getHubByAuthor } from "../../helpers/hub";
+import { ErrorHandler } from "../../interfaces/exception.interface";
+import { Feature } from "../../interfaces/feature.interface";
+import { Hub, HubConfig as Config } from "../../interfaces/hub.interface";
+import Common from "./common";
+import World from "./world";
 
 export default class EditHub implements Feature {
     /**
@@ -22,6 +28,8 @@ export default class EditHub implements Feature {
      */
     private hubs: { [propName: string]: Hub } = {};
 
+    private errorHandlers: ErrorHandler[] = [];
+
     public readonly commandName = "edit";
 
     /**
@@ -30,6 +38,11 @@ export default class EditHub implements Feature {
     constructor(config: Config) {
         this.config = config;
         this.hubs = {};
+        this.errorHandlers = [
+            new InvalidSyntaxHandler(this.commandHelpEmbed),
+            new InvalidIdHandler(),
+            new InvalidAttributeHandler(),
+        ];
     }
 
     @delayAction(250)
@@ -41,15 +54,20 @@ export default class EditHub implements Feature {
     }
 
     get commandHelpEmbed(): RichEmbed {
+        const prefix = this.config.prefix;
+        const commandName = prefix + this.commandName;
+        const childFields: Array<{ name: string; value: string }> = [
+            new World().commandHelpEmbedField(commandName),
+            new Common().commandHelpEmbedField(commandName),
+        ];
+
         return new RichEmbed({
             fields: [
                 {
-                    name: `\:arrow_forward: \`${this.config.prefix}${this.commandName} <ID/Pass/Description> <Value>\``,
-                    value:
-                        `Edit information of the hub you have previously posted.$\n\n` +
-                        `Example:\n` +
-                        `\`${this.config.prefix}${this.commandName} Pass 3434\`\n`,
+                    name: `__Edit posted online hub information__`,
+                    value: `Selected game and platform may not be edited`,
                 },
+                ...childFields,
             ],
         });
     }
@@ -60,42 +78,38 @@ export default class EditHub implements Feature {
      * @param {Bot} bot
      * @param {Message} message
      */
-    private editHub(bot: Bot, message: Message) {
-        const pieces = message.content.split(" ");
+    private async editHub(bot: Bot, message: Message) {
+        const hub = getHubByAuthor(this.hubs, message.author) as Hub;
 
-        if (pieces.length >= 3) {
-            const attribute = pieces[1].toLowerCase() as "id" | "pass" | "description";
+        if (!hub) {
+            message.channel.send("You have not posted a hub", {
+                reply: message.author,
+            });
 
-            if (["id", "pass", "description"].includes(attribute)) {
-                let newValue = attribute === "description" ? pieces.slice(2).join(" ") : pieces[2];
+            return;
+        }
 
-                if (attribute === "pass") {
-                    newValue = parsePassword(newValue);
+        const strategy = hub.game === Games.MHW ? new World() : new Common();
+
+        try {
+            strategy.setMessage(message).isSyntaxValid();
+            const update: { [key: string]: string | null } = strategy.getUpdatedInfo();
+            const updatedHub: Hub = { ...hub, ...update };
+            this.hubs[hub.post.id] = updatedHub;
+
+            await this.applyEdit(updatedHub);
+
+            message.channel.send("Your hub has been updated", {
+                reply: message.author,
+            });
+        } catch (e) {
+            this.errorHandlers.forEach(handler => {
+                if (handler instanceof InvalidAttributeHandler) {
+                    handler.setValidAttributes(strategy.getUpdatableAttributes());
                 }
+            });
 
-                const hub = getHubByAuthor(this.hubs, message.author) as Hub;
-
-                if (hub) {
-                    hub[attribute] = newValue;
-                    this.hubs[hub.post.id] = hub;
-
-                    this.applyEdit(hub);
-
-                    message.channel.send("Your hub has been updated", {
-                        reply: message.author,
-                    });
-                } else {
-                    message.channel.send("You have not posted a hub", {
-                        reply: message.author,
-                    });
-                }
-            } else {
-                message.channel.send("Valid attributes are `id`, `pass`, and `description`", {
-                    reply: message.author,
-                });
-            }
-        } else {
-            message.channel.send(this.commandHelpEmbed);
+            handleErrorWithFallback(e, message, this.errorHandlers);
         }
     }
 
@@ -104,7 +118,7 @@ export default class EditHub implements Feature {
      *
      * @param {Hub} hub
      */
-    private applyEdit(hub: Hub) {
+    private async applyEdit(hub: Hub) {
         const embed = getEmbed(hub);
 
         if (hub.expires) {
@@ -116,7 +130,7 @@ export default class EditHub implements Feature {
             embed.title += ` 🚧 **Full** 🚧`;
         }
 
-        hub.post.edit("", { embed });
+        await hub.post.edit("", { embed });
     }
 
     /**

@@ -24,8 +24,11 @@ export default class Help implements Feature {
         return new RichEmbed({
             fields: [
                 {
-                    name: `\:arrow_forward: \`${this.prefix}${this.commandName}\``,
-                    value: "Get help with all the available commands.\n\n:information_source: <> Required\n:information_source: [ ] Optional",
+                    name: `__Get help with all the available commands__`,
+                    value: `:arrow_forward: \`${this.prefix}${this.commandName}\`
+
+                            :information_source: <> Required
+                            :information_source: [ ] Optional`,
                 },
             ],
         });
