@@ -11,5 +11,7 @@ jobs:
       run: yarn
       env:
         CI: true
+    - name: Copy sample config
+      run: cp config.json.sample src
     - name: Build
       run: yarn build
