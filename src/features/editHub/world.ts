@@ -23,7 +23,7 @@ export default class World extends Base {
 
         if (attribute === "id") {
             // To do: Abstract ID validation
-            if (!this.pieces[2].match(/^[a-zA-Z0-9]{12}$/)) {
+            if (!this.pieces[2].match(/^[a-zA-Z0-9!@#$%^&*()-=+?]{12}$/)) {
                 throw new InvalidId();
             }
         }

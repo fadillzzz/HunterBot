@@ -19,7 +19,7 @@ export default class World extends Base implements PostHubStrategy {
             throw new InvalidSyntax();
         }
 
-        if (!this.pieces[2].match(/^[a-zA-Z0-9]{12}$/)) {
+        if (!this.pieces[2].match(/^[a-zA-Z0-9!@#$%^&*()-=+?]{12}$/)) {
             throw new InvalidId();
         }
 
