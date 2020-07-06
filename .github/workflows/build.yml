@@ -1,0 +1,17 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install dependencies
+      run: yarn
+      env:
+        CI: true
+    - name: Copy sample config
+      run: cp config.json.sample src/config.json
+    - name: Build
+      run: yarn build
