@@ -1,0 +1,27 @@
+import { getHubByAuthor } from "helpers/hub";
+import { DeleteHub } from "features";
+
+jest.mock("helpers/hub");
+
+describe("Delete Hub", () => {
+    it("should reply with a message if the user has not posted a hub", () => {
+        const message = { content: "delete", channel: { send: jest.fn() } };
+        getHubByAuthor.mockReturnValueOnce(undefined);
+        new DeleteHub().respond({}, message);
+        expect(message.channel.send.mock.calls.length).toBe(1);
+        expect(message.channel.send.mock.calls[0][0]).toBe("You have not posted a hub");
+    });
+
+    it("should delete hub when the user uses the /delete command", () => {
+        const message = { content: "delete", react: jest.fn() };
+        getHubByAuthor.mockReturnValueOnce({ post: { id: 1 } });
+        new DeleteHub().respond({}, message);
+        // There's currently no good way to check this functionality because of private modifiers
+        // This is the best we can do for now
+        expect(message.react.mock.calls.length).toBe(1);
+    });
+
+    it.skip("should delete hub when the user click on the trash icon", () => {
+        // How the heck do I event test this?
+    });
+});

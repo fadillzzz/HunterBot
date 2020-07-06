@@ -1,4 +1,4 @@
-import { Message, MessageReaction, RichEmbed, User } from "discord.js";
+import { Message, MessageReaction, MessageEmbed, User } from "discord.js";
 import Bot from "../bot";
 import { isCommandEqualTo } from "../helpers/common";
 import { getHubByAuthor } from "../helpers/hub";
@@ -30,8 +30,8 @@ export default class DeleteHub implements Feature {
         this.config = config;
     }
 
-    get commandHelpEmbed(): RichEmbed {
-        return new RichEmbed({
+    get commandHelpEmbed(): MessageEmbed {
+        return new MessageEmbed({
             fields: [
                 {
                     name: "__Delete your posted hub__",
@@ -91,29 +91,22 @@ export default class DeleteHub implements Feature {
 
         this.hubs[data.post.id] = Object.assign({}, this.hubs[data.post.id], { collector });
 
-        collector.on("collect", (reaction: MessageReaction) => {
-            reaction.users
-                .filter((user: User) => {
-                    return user.id !== data.author.id && user.id !== bot.client.user.id;
-                })
-                .forEach((user: User) => {
-                    reaction.remove(user);
-                });
+        collector.on("collect", (reaction: MessageReaction, user: User) => {
+            if (user.id !== bot.client.user?.id) {
+                reaction.users.remove(user);
+            }
 
-            reaction.users.forEach((user: User) => {
-                if (user.id === data.author.id) {
-                    if (reaction.emoji.name === "🗑") {
-                        this.deleteHub(bot, data.post);
-                    }
-
-                    if (reaction.emoji.name === "🔁") {
-                        clearTimeout(this.hubs[data.post.id].timer);
-                        this.hubs[data.post.id].collector.stop();
-                        this.setUpTimer(bot, data).setUpActionButtons(bot, data);
-                        reaction.remove(user.id);
-                    }
+            if (user.id === data.author.id) {
+                if (reaction.emoji.name === "🗑") {
+                    this.deleteHub(bot, data.post);
                 }
-            });
+
+                if (reaction.emoji.name === "🔁") {
+                    clearTimeout(this.hubs[data.post.id].timer);
+                    this.hubs[data.post.id].collector.stop();
+                    this.setUpTimer(bot, data).setUpActionButtons(bot, data);
+                }
+            }
         });
 
         return this;

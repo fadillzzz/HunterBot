@@ -30,7 +30,7 @@ export default abstract class Base {
             author: {
                 id: this.message.author.id,
                 tag: this.message.author.tag,
-                displayAvatarURL: this.message.author.displayAvatarURL,
+                displayAvatarURL: this.message.author.displayAvatarURL(),
             },
         };
     }

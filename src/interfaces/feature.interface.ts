@@ -1,5 +1,5 @@
 import Bot from '../bot';
-import {Message, RichEmbed} from 'discord.js';
+import {Message, MessageEmbed} from 'discord.js';
 
 export interface Feature {
     /**
@@ -38,7 +38,7 @@ export interface Feature {
     /**
      * Should return a rich embed describing the command
      *
-     * @var {RichEmbed}
+     * @var {MessageEmbed}
      */
-    commandHelpEmbed?: RichEmbed;
+    commandHelpEmbed?: MessageEmbed;
 }
