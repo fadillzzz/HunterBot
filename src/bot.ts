@@ -54,16 +54,6 @@ export default class Bot {
     }
 
     /**
-     * Sets the channel in which the bot actively listens for commands
-     *
-     * @return {this}
-     */
-    public setListenChannel(channelId: string): this {
-        this.listenChannel = channelId;
-        return this;
-    }
-
-    /**
      * Initialise the bot
      *
      * @return {this}
@@ -89,8 +79,6 @@ export default class Bot {
                 }
             });
         });
-
-        this._client.login(this.config.token);
 
         return this;
     }
@@ -147,5 +135,14 @@ export default class Bot {
      */
     get features(): Feature[] {
         return this._features;
+    }
+
+    /**
+     * Retrieves the bot's command prefix
+     *
+     * @return {String}
+     */
+    get prefix(): string {
+        return this.config.prefix;
     }
 }

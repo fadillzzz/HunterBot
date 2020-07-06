@@ -53,6 +53,6 @@ export default class Help implements Feature {
     }
 
     public init(bot: Bot) {
-        bot.client.user?.setPresence({ activity: { name: "Type /help" }, status: "online"});
+        bot.client.user?.setPresence({ activity: { name: `Type ${bot.prefix}help` }, status: "online"});
     }
 }
