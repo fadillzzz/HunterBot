@@ -80,7 +80,7 @@ export default class Bot {
 
         this._client.on("ready", () => {
             if (this.config.avatar) {
-                this._client.user.setAvatar(this.config.avatar);
+                this._client.user?.setAvatar(this.config.avatar);
             }
 
             this._features.map(feature => {

@@ -1,4 +1,4 @@
-import { Message, RichEmbed, TextChannel } from "discord.js";
+import { Message, MessageEmbed, TextChannel } from "discord.js";
 import Bot from "../../bot";
 import { checkMessageExists, delayAction } from "../../decorators/common";
 import { Games } from "../../enums/hub.enum";
@@ -71,7 +71,7 @@ export default class PostHub implements Feature {
         ];
     }
 
-    get commandHelpEmbed(): RichEmbed {
+    get commandHelpEmbed(): MessageEmbed {
         const prefix = this.config.prefix;
         const commandName = prefix + this.commandName;
         const fetched: { [key: string]: boolean } = {};
@@ -80,7 +80,7 @@ export default class PostHub implements Feature {
             this.hubStrategies.mh4u.commandHelpEmbedField(commandName),
         ];
 
-        return new RichEmbed({
+        return new MessageEmbed({
             fields: [
                 {
                     name: `__Post your online hub information__`,
@@ -144,7 +144,7 @@ export default class PostHub implements Feature {
 
             const hubInfo: HubPrototype = hubStrat.extractHubInfo();
             const channelId: string = hubStrat.getTargetChannelId();
-            const channel: TextChannel = bot.client.channels.get(channelId) as TextChannel;
+            const channel: TextChannel = await bot.client.channels.fetch(channelId) as TextChannel;
 
             const post = await channel.send("", {
                 embed: getEmbed(hubInfo),

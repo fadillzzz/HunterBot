@@ -38,7 +38,7 @@ export function checkMessageExists(target: any, key: string, descriptor: Propert
             });
 
             if (message) {
-                await message.channel.fetchMessage(message.id);
+                await message.fetch();
                 return original.apply(this, arguments);
             }
         } catch (e) {

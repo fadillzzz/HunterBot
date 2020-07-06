@@ -1,4 +1,4 @@
-import { Message, MessageReaction, RichEmbed, User } from "discord.js";
+import { Message, MessageReaction, MessageEmbed, User } from "discord.js";
 import moment from "moment";
 import Bot from "../../bot";
 import { checkMessageExists, delayAction } from "../../decorators/common";
@@ -53,7 +53,7 @@ export default class EditHub implements Feature {
         }
     }
 
-    get commandHelpEmbed(): RichEmbed {
+    get commandHelpEmbed(): MessageEmbed {
         const prefix = this.config.prefix;
         const commandName = prefix + this.commandName;
         const childFields: Array<{ name: string; value: string }> = [
@@ -61,7 +61,7 @@ export default class EditHub implements Feature {
             new Common().commandHelpEmbedField(commandName),
         ];
 
-        return new RichEmbed({
+        return new MessageEmbed({
             fields: [
                 {
                     name: `__Edit posted online hub information__`,
@@ -121,14 +121,14 @@ export default class EditHub implements Feature {
 
         if (hub.expires) {
             embed.footer!.text += " | Expires";
-            embed.timestamp = hub.expires;
+            embed.setTimestamp(hub.expires);
         }
 
         if (hub.full) {
             embed.title += ` 🚧 **Full** 🚧`;
         }
 
-        await hub.post.edit("", { embed });
+        await hub.post.edit("", embed);
     }
 
     /**
@@ -156,23 +156,17 @@ export default class EditHub implements Feature {
 
         this.hubs[data.post.id] = Object.assign({}, this.hubs[data.post.id], { collector });
 
-        collector.on("collect", (reaction: MessageReaction) => {
-            reaction.users
-                .filter((user: User) => {
-                    return user.id !== data.author.id && user.id !== bot.client.user.id;
-                })
-                .forEach((user: User) => {
-                    reaction.remove(user);
-                });
-            reaction.users.forEach((user: User) => {
-                if (user.id === data.author.id) {
-                    if (reaction.emoji.name === "🚧") {
-                        this.hubs[data.post.id].full = !this.hubs[data.post.id].full;
-                        this.applyEdit(this.hubs[data.post.id]);
-                        reaction.remove(user.id);
-                    }
+        collector.on("collect", (reaction: MessageReaction, user: User) => {
+            if (user.id !== bot.client.user?.id) {
+                reaction.users.remove(user);
+            }
+            
+            if (user.id === data.author.id) {
+                if (reaction.emoji.name === "🚧") {
+                    this.hubs[data.post.id].full = !this.hubs[data.post.id].full;
+                    this.applyEdit(this.hubs[data.post.id]);
                 }
-            });
+            }
         });
 
         return this;

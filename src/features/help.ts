@@ -1,4 +1,4 @@
-import { Message, RichEmbed } from "discord.js";
+import { Message, MessageEmbed } from "discord.js";
 import Bot from "../bot";
 import { isCommandEqualTo } from "../helpers/common";
 import { Feature } from "../interfaces/feature.interface";
@@ -20,8 +20,8 @@ export default class Help implements Feature {
         this.prefix = prefix;
     }
 
-    get commandHelpEmbed(): RichEmbed {
-        return new RichEmbed({
+    get commandHelpEmbed(): MessageEmbed {
+        return new MessageEmbed({
             fields: [
                 {
                     name: `__Get help with all the available commands__`,
@@ -37,7 +37,7 @@ export default class Help implements Feature {
     public respond(bot: Bot, message: Message) {
         if (isCommandEqualTo("help", message.content)) {
             const commandHelps = bot.features.map(feature => feature.commandHelpEmbed);
-            const embed = new RichEmbed();
+            const embed = new MessageEmbed();
 
             commandHelps.forEach(helpEmbed => {
                 if (helpEmbed && helpEmbed.fields) {
@@ -53,6 +53,6 @@ export default class Help implements Feature {
     }
 
     public init(bot: Bot) {
-        bot.client.user.setPresence({ game: { name: "Type /help" }, status: "online" });
+        bot.client.user?.setPresence({ activity: { name: "Type /help" }, status: "online"});
     }
 }

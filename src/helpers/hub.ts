@@ -1,4 +1,4 @@
-import { RichEmbed } from "discord.js";
+import { MessageEmbed } from "discord.js";
 import { Hub, HubPrototype } from "../interfaces/hub.interface";
 
 /**
@@ -20,16 +20,16 @@ export function parsePassword(password: string): string {
  * @param {String} description
  * @param {String} author.tag
  * @param {String} author.displayAvatarURL
- * @return {RichEmbed}
+ * @return {MessageEmbed}
  */
-export function getEmbed({ game, id, pass, description = "", author }: HubPrototype): RichEmbed {
+export function getEmbed({ game, id, pass, description = "", author }: HubPrototype): MessageEmbed {
     const fields = [];
 
     if (pass) {
         fields.push({ name: "Password:", value: pass });
     }
 
-    return new RichEmbed({
+    return new MessageEmbed({
         title: `[${game}] ${id}`,
         description: description ? `\`\`\`${description}\`\`\`` : "",
         fields,

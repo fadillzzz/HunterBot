@@ -1,4 +1,4 @@
-import { Message, RichEmbed } from "discord.js";
+import { Message, MessageEmbed } from "discord.js";
 import { ErrorHandler } from "../../interfaces/exception.interface";
 import { InvalidSyntax } from "../common";
 import Base from "./base";
@@ -7,16 +7,16 @@ export default class InvalidSyntaxHandler extends Base implements ErrorHandler {
     /**
      * Embed to send that displays the correct syntax
      *
-     * @var {RichEmbed}
+     * @var {MessageEmbed}
      */
-    private embed: RichEmbed;
+    private embed: MessageEmbed;
 
     protected errorType = InvalidSyntax;
 
     /**
-     * @param {RichEmbed} embed
+     * @param {MessageEmbed} embed
      */
-    constructor(embed: RichEmbed) {
+    constructor(embed: MessageEmbed) {
         super();
         this.embed = embed;
     }
