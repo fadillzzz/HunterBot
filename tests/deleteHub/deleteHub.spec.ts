@@ -1,5 +1,6 @@
 import { getHubByAuthor } from "helpers/hub";
 import { DeleteHub } from "features";
+import { MessageEmbed } from "discord.js";
 
 jest.mock("helpers/hub");
 
@@ -23,5 +24,9 @@ describe("Delete Hub", () => {
 
     it.skip("should delete hub when the user click on the trash icon", () => {
         // How the heck do I event test this?
+    });
+
+    it("should have an embed for the help message", () => {
+        expect(new DeleteHub({prefix: ""}).commandHelpEmbed).toBeInstanceOf(MessageEmbed);
     });
 });
