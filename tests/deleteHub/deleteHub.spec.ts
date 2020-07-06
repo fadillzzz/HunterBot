@@ -8,8 +8,8 @@ describe("Delete Hub", () => {
         const message = { content: "delete", channel: { send: jest.fn() } };
         getHubByAuthor.mockReturnValueOnce(undefined);
         new DeleteHub().respond({}, message);
-        expect(message.channel.send.mock.calls.length).toBe(1);
-        expect(message.channel.send.mock.calls[0][0]).toBe("You have not posted a hub");
+        expect(message.channel.send).toHaveBeenCalledTimes(1);
+        expect(message.channel.send).toHaveBeenCalledWith("You have not posted a hub", { "reply": undefined });
     });
 
     it("should delete hub when the user uses the /delete command", () => {
@@ -18,7 +18,7 @@ describe("Delete Hub", () => {
         new DeleteHub().respond({}, message);
         // There's currently no good way to check this functionality because of private modifiers
         // This is the best we can do for now
-        expect(message.react.mock.calls.length).toBe(1);
+        expect(message.react).toHaveBeenCalledTimes(1);
     });
 
     it.skip("should delete hub when the user click on the trash icon", () => {
