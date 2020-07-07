@@ -160,7 +160,7 @@ export default class EditHub implements Feature {
             if (user.id !== bot.client.user?.id) {
                 reaction.users.remove(user);
             }
-            
+
             if (user.id === data.author.id) {
                 if (reaction.emoji.name === "🚧") {
                     this.hubs[data.post.id].full = !this.hubs[data.post.id].full;

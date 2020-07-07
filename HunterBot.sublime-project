@@ -8,6 +8,9 @@
     ],
     "settings": {
         "translate_tabs_to_spaces": true,
-        "tab_size": 4
+        "tab_size": 4,
+        "js_prettier": {
+            "auto_format_on_save": true
+        }
     }
 }
