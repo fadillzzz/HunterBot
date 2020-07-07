@@ -1,6 +1,7 @@
 import { Client, Message } from "discord.js";
 import { Config } from "./interfaces/bot.interface";
 import { Feature } from "./interfaces/feature.interface";
+import BotManager from "./botManager";
 
 export default class Bot {
     /**
@@ -25,21 +26,29 @@ export default class Bot {
     private config: Config;
 
     /**
-     * The listening channel for the bot.
+     * A reference to the bot manager
+     *
+     * @var {Botmanager}
+     */
+    private manager: BotManager | null;
+
+    /**
+     * Guild ID
      *
      * @var {String}
      */
-    private listenChannel: string;
+    private guildId: string;
 
     /**
      * @param {Client} client Discord client
      * @param {Config} config Bot config
      */
-    constructor(client: Client, config: Config) {
+    constructor(client: Client, config: Config, guildId: string) {
         this._features = [];
         this._client = client;
         this.config = config;
-        this.listenChannel = config.listenChannel;
+        this.guildId = guildId;
+        this.manager = null;
     }
 
     /**
@@ -54,31 +63,17 @@ export default class Bot {
     }
 
     /**
-     * Initialise the bot
+     * Handles incoming message
      *
      * @return {this}
      */
-    public init(): this {
-        this._client.on("message", message => {
-            if (this.understandable(message)) {
-                message.content = message.content.substr(this.config.prefix.length);
-                this._features.map(feature => {
-                    feature.respond(this, message);
-                });
-            }
-        });
-
-        this._client.on("ready", () => {
-            if (this.config.avatar) {
-                this._client.user?.setAvatar(this.config.avatar);
-            }
-
-            this._features.map(feature => {
-                if (feature.init) {
-                    feature.init(this);
-                }
+    public handle(message: Message): this {
+        if (this.understandable(message)) {
+            message.content = message.content.substr(this.config.prefix.length);
+            this._features.map((feature) => {
+                feature.respond(this, message);
             });
-        });
+        }
 
         return this;
     }
@@ -94,7 +89,7 @@ export default class Bot {
         if (
             message.content.startsWith(this.config.prefix) &&
             !message.author.bot &&
-            message.channel.id === this.listenChannel
+            (message.channel.id === this.config.listenChannel || !this.config.listenChannel)
         ) {
             return true;
         }
@@ -110,12 +105,27 @@ export default class Bot {
      * @return {this}
      */
     public broadcast(event: string, data: any): this {
-        this._features.map(feature => {
+        this._features.map((feature) => {
             if (feature.on) {
                 feature.on(event, data, this);
             }
         });
 
+        if (event === "configUpdated" && this.manager) {
+            this.manager.updateBotConfig(this.guildId, this.config);
+        }
+
+        return this;
+    }
+
+    /**
+     * Sets a reference to the bot manager
+     *
+     * @param {BotManager} manager
+     * @return {this}
+     */
+    public setManager(manager: BotManager): this {
+        this.manager = manager;
         return this;
     }
 

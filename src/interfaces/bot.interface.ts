@@ -1,6 +1,6 @@
 export interface Config {
-    token: string;
     prefix: string;
     listenChannel: string;
-    avatar: string;
+    games: any;
+    timer: number;
 }

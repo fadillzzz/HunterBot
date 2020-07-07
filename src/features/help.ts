@@ -2,22 +2,23 @@ import { Message, MessageEmbed } from "discord.js";
 import Bot from "../bot";
 import { isCommandEqualTo } from "../helpers/common";
 import { Feature } from "../interfaces/feature.interface";
+import { Config } from "../interfaces/bot.interface";
 
 export default class Help implements Feature {
     /**
-     * Command prefix
+     * Bot config
      *
-     * @var {String}
+     * @var {Config}
      */
-    private prefix: string;
+    private config: Config;
 
     public readonly commandName = "help";
 
     /**
-     * @param {String} prefix
+     * @param {Config} config
      */
-    constructor(prefix: string) {
-        this.prefix = prefix;
+    constructor(config: Config) {
+        this.config = config;
     }
 
     get commandHelpEmbed(): MessageEmbed {
@@ -25,7 +26,7 @@ export default class Help implements Feature {
             fields: [
                 {
                     name: `__Get help with all the available commands__`,
-                    value: `:arrow_forward: \`${this.prefix}${this.commandName}\`
+                    value: `:arrow_forward: \`${this.config.prefix}${this.commandName}\`
 
                             :information_source: <> Required
                             :information_source: [ ] Optional`,
@@ -50,9 +51,5 @@ export default class Help implements Feature {
             message.author.send("", { embed });
             message.react("✅");
         }
-    }
-
-    public init(bot: Bot) {
-        bot.client.user?.setPresence({ activity: { name: `Type ${bot.prefix}help` }, status: "online"});
     }
 }

@@ -1,0 +1,26 @@
+{
+    "prefix": "/",
+    "listenChannel": "",
+    "games": {
+        "mhw": {
+            "channels": {
+                "xbox": "",
+                "ps4": "",
+                "pc": ""
+            }
+        },
+        "mh4u": {
+            "channel": ""
+        },
+        "mhxx": {
+            "channel": ""
+        },
+        "mhgu": {
+            "channel": ""
+        },
+        "mhgen": {
+            "channel": ""
+        }
+    },
+    "timer": 7200
+}
