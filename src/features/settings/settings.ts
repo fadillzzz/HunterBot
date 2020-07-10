@@ -4,12 +4,13 @@ import { Message, MessageEmbed } from "discord.js";
 import Bot from "../../bot";
 import { Config } from "../../interfaces/bot.interface";
 import { SettingsStrategy } from "../../interfaces/settings.interface";
-import { InvalidSyntaxHandler } from "../../exceptions/handlers";
+import { InvalidOptionHandler, InvalidSyntaxHandler } from "../../exceptions/handlers";
 import { ErrorHandler } from "../../interfaces/exception.interface";
 import { InvalidSyntax } from "../../exceptions/common";
 import Common from "./common";
 import CommonGame from "./commonGame";
 import World from "./world";
+import { InvalidOption } from "../../exceptions/settings";
 
 export default class Settings implements Feature {
     /**
@@ -46,16 +47,26 @@ export default class Settings implements Feature {
             mhw: new World(),
         };
 
-        this.errorHandlers = [new InvalidSyntaxHandler(this.commandHelpEmbed)];
+        this.errorHandlers = [new InvalidSyntaxHandler(this.commandHelpEmbed), new InvalidOptionHandler()];
     }
 
     get commandHelpEmbed(): MessageEmbed {
+        const prefix = this.config.prefix;
+        const commandName = prefix + this.commandName;
+        const fetched: { [key: string]: boolean } = {};
+        const childFields: Array<{ name: string; value: string }> = [
+            this.strats.timer.commandHelpEmbedField(commandName),
+            this.strats.mh4u.commandHelpEmbedField(commandName),
+            this.strats.mhw.commandHelpEmbedField(commandName),
+        ];
+
         return new MessageEmbed({
             fields: [
                 {
                     name: `__Configure the bot__`,
                     value: `:arrow_forward: \`${this.config.prefix}${this.commandName}\``,
                 },
+                ...childFields,
             ],
         });
     }
@@ -63,6 +74,7 @@ export default class Settings implements Feature {
     public respond(bot: Bot, message: Message) {
         if (isCommandEqualTo(this.commandName, message.content)) {
             try {
+                console.log(message.author);
                 const pieces = message.content.split(" ");
 
                 if (pieces.length <= 1) {
@@ -72,7 +84,7 @@ export default class Settings implements Feature {
                 const strat = this.strats[pieces[1]];
 
                 if (!strat) {
-                    throw new InvalidSyntax();
+                    throw new InvalidOption();
                 }
 
                 strat.isSyntaxValid(pieces.slice(1));

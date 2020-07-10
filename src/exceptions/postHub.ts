@@ -1,3 +1,1 @@
-import { Exception } from "./common";
-
-export class InvalidPlatform extends Exception {}
+export class InvalidPlatform extends Error {}

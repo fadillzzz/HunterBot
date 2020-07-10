@@ -74,7 +74,6 @@ export default class PostHub implements Feature {
     get commandHelpEmbed(): MessageEmbed {
         const prefix = this.config.prefix;
         const commandName = prefix + this.commandName;
-        const fetched: { [key: string]: boolean } = {};
         const childFields: Array<{ name: string; value: string }> = [
             this.hubStrategies.mhw.commandHelpEmbedField(commandName),
             this.hubStrategies.mh4u.commandHelpEmbedField(commandName),
@@ -144,7 +143,7 @@ export default class PostHub implements Feature {
 
             const hubInfo: HubPrototype = hubStrat.extractHubInfo();
             const channelId: string = hubStrat.getTargetChannelId();
-            const channel: TextChannel = await bot.client.channels.fetch(channelId) as TextChannel;
+            const channel: TextChannel = (await bot.client.channels.fetch(channelId)) as TextChannel;
 
             const post = await channel.send("", {
                 embed: getEmbed(hubInfo),
