@@ -1,5 +1,3 @@
-import { Exception } from "../common";
-
 export default abstract class Base {
     /**
      * A reference to the exception class that the child should process
@@ -9,7 +7,7 @@ export default abstract class Base {
      */
     protected errorType!: Function;
 
-    public validError(error: Exception): boolean {
+    public validError(error: Error): boolean {
         if (error instanceof this.errorType) {
             return true;
         }

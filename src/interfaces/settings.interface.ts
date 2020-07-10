@@ -18,4 +18,21 @@ export interface SettingsStrategy {
      * @return {this}
      */
     updateConfig(config: Config, pieces: string[]): Config;
+
+    /**
+     * Check if the given option is valid. May throw an exception.
+     *
+     * @param {String} option
+     * @return {Boolean}
+     */
+    isOptionValid(option: string): boolean;
+
+    /**
+     * Returns the command embed field for the given set of options
+     *
+     * @param {String} commandName
+     * @return { name: String, value: String }
+     * @Todo This should be its own interface
+     */
+    commandHelpEmbedField(commandName: string): { name: string; value: string };
 }

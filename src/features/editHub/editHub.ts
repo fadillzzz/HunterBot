@@ -4,7 +4,7 @@ import Bot from "../../bot";
 import { checkMessageExists, delayAction } from "../../decorators/common";
 import { Games } from "../../enums/hub.enum";
 import { InvalidIdHandler, InvalidSyntaxHandler } from "../../exceptions/handlers";
-import { InvalidAttributeHandler } from "../../exceptions/handlers/editHub";
+import { InvalidAttributeHandler } from "../../exceptions/handlers";
 import { handleErrorWithFallback, isCommandEqualTo } from "../../helpers/common";
 import { getEmbed, getHubByAuthor } from "../../helpers/hub";
 import { ErrorHandler } from "../../interfaces/exception.interface";
@@ -101,7 +101,7 @@ export default class EditHub implements Feature {
 
             message.react("✅");
         } catch (e) {
-            this.errorHandlers.forEach(handler => {
+            this.errorHandlers.forEach((handler) => {
                 if (handler instanceof InvalidAttributeHandler) {
                     handler.setValidAttributes(strategy.getUpdatableAttributes());
                 }
@@ -182,10 +182,7 @@ export default class EditHub implements Feature {
             const hub = this.hubs[data.post.id];
 
             if (hub) {
-                hub.expires = moment()
-                    .utc()
-                    .add(data.timer, "seconds")
-                    .toDate();
+                hub.expires = moment().utc().add(data.timer, "seconds").toDate();
                 this.hubs[data.post.id] = hub;
                 this.applyEdit(hub);
                 // Set up the button again to reset the reaction collector timer

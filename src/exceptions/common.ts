@@ -1,5 +1,4 @@
-export class Exception {} // Adding this, because support for extending native classes is shit
-export class InvalidSyntax extends Exception {}
-export class InvalidConfig extends Exception {}
-export class InvalidGame extends Exception {}
-export class InvalidId extends Exception {}
+export class InvalidSyntax extends Error {}
+export class InvalidConfig extends Error {}
+export class InvalidGame extends Error {}
+export class InvalidId extends Error {}
