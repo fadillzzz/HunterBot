@@ -114,6 +114,6 @@ export default class Settings implements Feature {
             return true;
         }
 
-        return true;
+        return false;
     }
 }
