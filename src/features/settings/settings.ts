@@ -1,6 +1,6 @@
 import { Feature } from "../../interfaces/feature.interface";
 import { handleErrorWithFallback, isCommandEqualTo } from "../../helpers/common";
-import { Message, MessageEmbed } from "discord.js";
+import { GuildMember, Message, MessageEmbed, Permissions } from "discord.js";
 import Bot from "../../bot";
 import { Config } from "../../interfaces/bot.interface";
 import { SettingsStrategy } from "../../interfaces/settings.interface";
@@ -72,9 +72,8 @@ export default class Settings implements Feature {
     }
 
     public respond(bot: Bot, message: Message) {
-        if (isCommandEqualTo(this.commandName, message.content)) {
+        if (isCommandEqualTo(this.commandName, message.content) && this.isAllowed(message.member)) {
             try {
-                console.log(message.author);
                 const pieces = message.content.split(" ");
 
                 if (pieces.length <= 1) {
@@ -98,5 +97,23 @@ export default class Settings implements Feature {
                 handleErrorWithFallback(e, message, this.errorHandlers);
             }
         }
+    }
+
+    /**
+     * Check if the user is an admin
+     *
+     * @param {GuildMember} user
+     * @return {Boolean}
+     */
+    private isAllowed(user: GuildMember | null): boolean {
+        if (!user) {
+            return false;
+        }
+
+        if (user.hasPermission(Permissions.FLAGS.ADMINISTRATOR)) {
+            return true;
+        }
+
+        return true;
     }
 }
